@@ -2,7 +2,7 @@ import {Module} from '@nestjs/common';
 import {AuthModule} from './modules/auth/auth.module';
 import {ConfigModule, ConfigService} from '@nestjs/config';
 import {UsersModule} from './modules/users/users.module';
-import {AppConfig, DatabaseConfig} from './config';
+import {AppConfig, DatabaseConfig, JwtConfig} from './config';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {User} from '../db/entities/user.entity';
 
@@ -13,7 +13,7 @@ import {User} from '../db/entities/user.entity';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [AppConfig, DatabaseConfig],
+      load: [AppConfig, DatabaseConfig, JwtConfig],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
