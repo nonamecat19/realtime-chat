@@ -1,8 +1,9 @@
 import axios from 'axios';
 import {CookieService} from '@/services/CookieService.ts';
+import {ConfigService} from '@/services/ConfigService.ts';
 
 const request = axios.create({
-  baseURL: import.meta.env.VITE_BASE_API_URL,
+  baseURL: ConfigService.apiUrl,
   withCredentials: true,
 });
 
