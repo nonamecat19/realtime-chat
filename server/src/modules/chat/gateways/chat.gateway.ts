@@ -1,10 +1,17 @@
-import {WebSocketGateway, SubscribeMessage, WebSocketServer} from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  WebSocketServer,
+  MessageBody,
+  ConnectedSocket,
+} from '@nestjs/websockets';
 import {ChatService} from '../services/chat.service';
 import {Server, Socket} from 'socket.io';
 import {ChatEvents} from '../types/chatEvents.types';
-import {UseGuards} from '@nestjs/common';
+import {UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
+import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 
 @WebSocketGateway({
   cors: {
@@ -12,6 +19,8 @@ import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
   },
 })
 @UseGuards(WsJwtGuard)
+@UsePipes(ValidationPipe)
+@UseFilters(WsExceptionFilter)
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
 
