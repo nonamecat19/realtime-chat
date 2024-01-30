@@ -7,15 +7,15 @@ interface IProps {
 }
 export default function UsersList({data}: IProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <h3>Online</h3>
+    <div className="flex flex-col gap-2 grow mt-3">
+      <h3 className="text-emerald-700">Online</h3>
       {data
         .filter(el => el.online)
         .map(user => (
           <UsersListElement key={user.id} {...user} />
         ))}
       <Separator />
-      <h3>Offline</h3>
+      <h3 className="text-red-700">Offline</h3>
       {data
         .filter(el => !el.online)
         .map(user => (
