@@ -19,7 +19,7 @@ const usersMock: (User & {online: boolean})[] = new Array(10).fill(null).map(() 
 
 export default function ChatHeader() {
   return (
-    <header className="flex justify-between items-center h-16 sm:h-12">
+    <header className="flex justify-between items-center h-16 sm:h-12 border-b">
       <h1 className="ml-5 text-4xl sm:text-2xl font-bold">Chat app</h1>
 
       <div className="block sm:hidden">
