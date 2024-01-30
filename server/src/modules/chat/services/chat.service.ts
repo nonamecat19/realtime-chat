@@ -23,12 +23,18 @@ export class ChatService {
   async sendMessage(userId: number, message: string, client: Socket) {
     console.log({userId, message});
     const user = await this.usersService.findOneById(userId);
+    if (user.isMuted) {
+      return client.emit('error', {status: 400, message: 'User is muted'});
+    }
+    if (user.isBanned) {
+      return client.emit('error', {status: 400, message: 'User is banned'});
+    }
     const newMessage = this.chatMessageRepository.create({
       message,
       user,
     });
     const result = await this.chatMessageRepository.save(newMessage);
-    client.emit('receive-message', result);
-    return 2;
+    client.broadcast.emit('receiveMessage', result);
+    client.emit('receiveMessage', result);
   }
 }
