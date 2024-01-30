@@ -4,6 +4,9 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {request} from '@/api/axios.ts';
+import {CookieService} from '@/services/CookieService.ts';
+import {useNavigate} from 'react-router-dom';
 
 const FormSchema = z.object({
   login: z.string().min(3, {
@@ -15,6 +18,8 @@ const FormSchema = z.object({
 });
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -23,8 +28,19 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      const res = await request.post('/auth/login', data);
+      const token = res?.data?.token;
+      if (!token) {
+        throw new Error('Auth error');
+      }
+      new CookieService().setToken(token);
+      navigate('/');
+    } catch (e) {
+      //TODO error handling
+      console.error(e);
+    }
   }
 
   return (
