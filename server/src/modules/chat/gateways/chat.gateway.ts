@@ -3,8 +3,8 @@ import {ChatService} from '../services/chat.service';
 import {Server, Socket} from 'socket.io';
 import {ChatEvents} from '../types/chatEvents.types';
 import {UseGuards} from '@nestjs/common';
-import {WsJwtGuard} from '../../../guards/ws-jwt/ws-jwt.guard';
-import {SocketAuthMiddleware} from '../../shared/auth/ws-jwt/ws.middleware';
+import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
+import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
 
 @WebSocketGateway({
   cors: {
