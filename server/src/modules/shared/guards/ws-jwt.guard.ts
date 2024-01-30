@@ -14,7 +14,7 @@ export class WsJwtGuard implements CanActivate {
     const {authorization} = client.handshake.headers;
 
     const token: string = authorization.split(' ')[1];
-    verify(token, 'secret');
+    client.data.user = verify(token, 'secret');
     return true;
   }
 }
