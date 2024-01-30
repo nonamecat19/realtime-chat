@@ -22,6 +22,10 @@ export class UsersService {
     });
   }
 
+  public findOneById(userId: number) {
+    return this.usersRepository.findOne({where: {id: userId}});
+  }
+
   public findAll() {
     return `This action returns all users`;
   }

@@ -11,6 +11,8 @@ import {ChatEvents} from '../types/chatEvents.types';
 import {UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
+import {getUserFromClient} from '../../shared/utils/socket.utils';
+import {SendMessageDto} from '../../dto/send-message.dto';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 
 @WebSocketGateway({
@@ -35,5 +37,11 @@ export class ChatGateway {
   @SubscribeMessage('getMessages')
   getMessages() {
     return this.chatService.getMessages();
+  }
+
+  @SubscribeMessage('sendMessage')
+  sendMessage(@MessageBody() sendMessageDto: SendMessageDto, @ConnectedSocket() client: Socket) {
+    const user = getUserFromClient(client);
+    return this.chatService.sendMessage(user.id, sendMessageDto.message, client);
   }
 }
