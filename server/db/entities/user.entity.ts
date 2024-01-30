@@ -1,4 +1,4 @@
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
 
 export enum RoleEnum {
   ADMIN = 'ADMIN',
@@ -31,6 +31,12 @@ export class User {
 
   @Column({default: false})
   isMuted: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   constructor(item: Partial<User>) {
     Object.assign(this, item);
