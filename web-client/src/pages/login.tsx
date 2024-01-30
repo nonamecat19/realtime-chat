@@ -6,7 +6,7 @@ import {z} from 'zod';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 
 const FormSchema = z.object({
-  nickname: z.string().min(3, {
+  login: z.string().min(3, {
     message: 'Username must be at least 3 characters.',
   }),
   password: z.string().min(8, {
@@ -18,7 +18,7 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      nickname: '',
+      login: '',
       password: '',
     },
   });
@@ -33,10 +33,10 @@ export default function LoginPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-72 w-2/3 space-y-2">
           <FormField
             control={form.control}
-            name="nickname"
+            name="login"
             render={({field}) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Login</FormLabel>
                 <FormControl>
                   <Input placeholder="your_nickname" {...field} />
                 </FormControl>
