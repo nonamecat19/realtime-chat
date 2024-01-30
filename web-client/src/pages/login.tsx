@@ -2,33 +2,24 @@ import {Input} from '@/components/ui/input.tsx';
 import {Button} from '@/components/ui/button.tsx';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
-import {z} from 'zod';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {request} from '@/api/axios.ts';
 import {CookieService} from '@/services/CookieService.ts';
 import {useNavigate} from 'react-router-dom';
-
-const FormSchema = z.object({
-  login: z.string().min(3, {
-    message: 'Username must be at least 3 characters.',
-  }),
-  password: z.string().min(8, {
-    message: 'Password must be at least 8 characters.',
-  }),
-});
+import {LoginFormInfer, LoginFormSchema} from '@/schemas/loginForm.ts';
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<LoginFormInfer>({
+    resolver: zodResolver(LoginFormSchema),
     defaultValues: {
       login: '',
       password: '',
     },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: LoginFormInfer) {
     try {
       const res = await request.post('/auth/login', data);
       const token = res?.data?.token;
