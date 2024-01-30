@@ -2,6 +2,7 @@ import {DataSource} from 'typeorm';
 import {config} from 'dotenv';
 import {ConfigService} from '@nestjs/config';
 import {User} from './db/entities/user.entity';
+import {ChatMessage} from './db/entities/chatMessage.entity';
 
 config();
 
@@ -15,5 +16,5 @@ export default new DataSource({
   username: configService.getOrThrow('MYSQL_USERNAME'),
   password: configService.getOrThrow('MYSQL_ROOT_PASSWORD'),
   migrations: ['src/modules/database/migrations/**'],
-  entities: [User],
+  entities: [User, ChatMessage],
 });

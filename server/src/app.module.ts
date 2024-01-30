@@ -21,6 +21,7 @@ import {ChatMessage} from '../db/entities/chatMessage.entity';
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         ...configService.get('database'),
+        autoLoadEntities: true,
       }),
       inject: [ConfigService],
     }),
