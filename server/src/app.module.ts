@@ -5,6 +5,8 @@ import {UsersModule} from './modules/users/users.module';
 import {AppConfig, DatabaseConfig, JwtConfig} from './config';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {User} from '../db/entities/user.entity';
+import {ChatModule} from './modules/chat/chat.module';
+import {JwtModule} from '@nestjs/jwt';
 import {ChatMessage} from '../db/entities/chatMessage.entity';
 
 @Module({
@@ -22,8 +24,15 @@ import {ChatMessage} from '../db/entities/chatMessage.entity';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([User, ChatMessage]),
+    ChatModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('jwt.jwtSecret'),
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [],
   providers: [],
