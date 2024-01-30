@@ -1,10 +1,4 @@
-import {
-  WebSocketGateway,
-  SubscribeMessage,
-  WebSocketServer,
-  MessageBody,
-  ConnectedSocket,
-} from '@nestjs/websockets';
+import {SubscribeMessage, WebSocketServer, MessageBody, ConnectedSocket} from '@nestjs/websockets';
 import {ChatService} from '../services/chat.service';
 import {Server, Socket} from 'socket.io';
 import {ChatEvents} from '../types/chatEvents.types';
@@ -14,12 +8,9 @@ import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
 import {getUserFromClient} from '../../shared/utils/socket.utils';
 import {SendMessageDto} from '../../dto/send-message.dto';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
+import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
 
-@WebSocketGateway({
-  cors: {
-    origin: 'http://localhost:5173',
-  },
-})
+@BaseWebSocketGateway()
 @UseGuards(WsJwtGuard)
 @UsePipes(ValidationPipe)
 @UseFilters(WsExceptionFilter)
