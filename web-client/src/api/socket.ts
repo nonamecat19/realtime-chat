@@ -6,10 +6,14 @@ export class SocketApi {
   static socket: null | Socket = null;
 
   static createConnection() {
+    if (this.socket) {
+      return;
+    }
+
     const token = new CookieService().getToken();
-    console.log({token});
 
     if (!token) {
+      console.error('No token');
       return;
     }
 
@@ -20,7 +24,8 @@ export class SocketApi {
     });
 
     this.socket.on('connect_error', e => {
-      console.error(e);
+      console.log('connect_error');
+      console.error({connectError: e});
     });
 
     this.socket.on('connect', () => {
@@ -29,11 +34,14 @@ export class SocketApi {
 
     this.socket.on('disconnect', e => {
       console.log('disconnect');
-      console.error(e);
+      console.error({disconnectError: e});
     });
   }
 
   static closeConnection() {
     this.socket?.close();
+    if (this.socket) {
+      this.socket = null;
+    }
   }
 }
