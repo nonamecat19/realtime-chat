@@ -12,16 +12,16 @@ export class ChatService {
     private readonly chatMessageRepository: Repository<ChatMessage>,
     private readonly usersService: UsersService
   ) {}
-  async getMessages() {
+  async getLastMessages() {
     return await this.chatMessageRepository.find({
       relations: {
         user: true,
       },
+      take: 20,
     });
   }
 
   async sendMessage(userId: number, message: string, client: Socket) {
-    console.log({userId, message});
     const user = await this.usersService.findOneById(userId);
     if (user.isMuted) {
       return client.emit('error', {status: 400, message: 'User is muted'});
@@ -35,6 +35,5 @@ export class ChatService {
     });
     const result = await this.chatMessageRepository.save(newMessage);
     client.broadcast.emit('receiveMessage', result);
-    client.emit('receiveMessage', result);
   }
 }

@@ -27,12 +27,15 @@ export class ChatGateway {
 
   @SubscribeMessage('getMessages')
   getMessages() {
-    return this.chatService.getMessages();
+    return this.chatService.getLastMessages();
   }
 
   @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() sendMessageDto: SendMessageDto, @ConnectedSocket() client: Socket) {
+  async sendMessage(
+    @MessageBody() sendMessageDto: SendMessageDto,
+    @ConnectedSocket() client: Socket
+  ) {
     const user = getUserFromClient(client);
-    return this.chatService.sendMessage(user.id, sendMessageDto.message, client);
+    await this.chatService.sendMessage(user.id, sendMessageDto.message, client);
   }
 }
