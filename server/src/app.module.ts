@@ -5,6 +5,7 @@ import {UsersModule} from './modules/users/users.module';
 import {AppConfig, DatabaseConfig, JwtConfig} from './config';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {User} from '../db/entities/user.entity';
+import {ChatMessage} from '../db/entities/chatMessage.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import {User} from '../db/entities/user.entity';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, ChatMessage]),
   ],
   controllers: [],
   providers: [],
