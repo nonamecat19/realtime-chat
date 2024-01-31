@@ -1,4 +1,10 @@
-import {SubscribeMessage, MessageBody, WebSocketServer} from '@nestjs/websockets';
+import {
+  SubscribeMessage,
+  MessageBody,
+  WebSocketServer,
+  OnGatewayDisconnect,
+  OnGatewayConnection,
+} from '@nestjs/websockets';
 import {UsersService} from '../services/users.service';
 import {UpdateUserDto} from '../dto/update-user.dto';
 import {Inject, Logger} from '@nestjs/common';
@@ -8,17 +14,34 @@ import {ReservedOrUserListener} from 'socket.io/dist/typed-events';
 import {UsersServer} from '../types/usersEvents.types';
 
 @BaseWebSocketGateway()
-export class UsersGateway implements OnModuleInit {
-  constructor(private readonly usersService: UsersService) {}
+export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  logger = new Logger(UsersGateway.name);
+
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache
+  ) {}
 
   @WebSocketServer()
   server: UsersServer;
 
-  onModuleInit() {
-    this.server.on('connection', socket => {
-      console.log(socket.id);
-      console.log('Connected');
-    });
+  async handleConnection(client: ReservedOrUserListener<any, any, any>) {
+    try {
+      await this.cacheManager.set(client.id, null);
+      this.logger.log(`Connected: ${client.id}`);
+    } catch (e) {
+      this.logger.error(`handleConnection: ${e.message}`);
+    }
+  }
+
+  async handleDisconnect(client: ReservedOrUserListener<any, any, any>) {
+    try {
+      await this.cacheManager.del(client.id);
+      this.logger.log(`Disconnected: ${client.id}`);
+    } catch (e) {
+      this.logger.error(`handleDisconnect: ${e.message}`);
+    }
   }
 
   @SubscribeMessage('findAllUsers')
