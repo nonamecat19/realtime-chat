@@ -9,12 +9,14 @@ import {getUserFromClient} from '../../shared/utils/socket.utils';
 import {SendMessageDto} from '../dto/send-message.dto';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
+import {Cron, CronExpression} from '@nestjs/schedule';
 
 @BaseWebSocketGateway()
 @UseGuards(WsJwtGuard)
 @UsePipes(ValidationPipe)
 @UseFilters(WsExceptionFilter)
 export class ChatGateway {
+  logger = new Logger(ChatGateway.name);
   constructor(private readonly chatService: ChatService) {}
 
   @WebSocketServer()
@@ -37,5 +39,11 @@ export class ChatGateway {
   ) {
     const user = getUserFromClient(client);
     await this.chatService.sendMessage(user.id, sendMessageDto.message, client);
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async handleCron() {
+    await this.chatService.broadcastOnlineStatus(this.server);
+    this.logger.log('Users notified');
   }
 }

@@ -22,7 +22,20 @@ export class WsJwtGuard implements CanActivate {
     const {authorization} = client.handshake.headers;
 
     const token: string = authorization.split(' ')[1];
-    client.data.user = verify(token, 'secret');
+    const dataFromToken = verify(token, 'secret') as JwtData;
+    client.data.user = dataFromToken;
+    const cacheData = {
+      ...dataFromToken,
+      timestamp: new Date(),
+    };
+    this.redis
+      .set(client.id, JSON.stringify(cacheData))
+      .then(() => {
+        this.logger.debug('Cache data:', cacheData);
+      })
+      .catch(e => {
+        this.logger.error('Cache set error', e.message);
+      });
     return true;
   }
 }

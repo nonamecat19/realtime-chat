@@ -7,15 +7,19 @@ import {
 } from '@nestjs/websockets';
 import {UsersService} from '../services/users.service';
 import {UpdateUserDto} from '../dto/update-user.dto';
-import {Inject, Logger} from '@nestjs/common';
+import {Logger, UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
-import {CACHE_MANAGER, Cache} from '@nestjs/cache-manager';
 import {ReservedOrUserListener} from 'socket.io/dist/typed-events';
 import {UsersServer} from '../types/usersEvents.types';
+import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
+import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import Redis from 'ioredis';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 
 @BaseWebSocketGateway()
+@UseGuards(WsJwtGuard)
+@UsePipes(ValidationPipe)
+@UseFilters(WsExceptionFilter)
 export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   logger = new Logger(UsersGateway.name);
 
@@ -30,7 +34,6 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: ReservedOrUserListener<any, any, any>) {
     try {
-      await this.cacheManager.set(client.id, null);
       this.logger.log(`Connected: ${client.id}`);
     } catch (e) {
       this.logger.error(`handleConnection: ${e.message}`);
