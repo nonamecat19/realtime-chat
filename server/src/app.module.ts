@@ -8,11 +8,16 @@ import {User} from '../db/entities/user.entity';
 import {ChatModule} from './modules/chat/chat.module';
 import {JwtModule} from '@nestjs/jwt';
 import {ChatMessage} from '../db/entities/chatMessage.entity';
+import {CacheModule} from '@nestjs/cache-manager';
+import {ScheduleModule} from '@nestjs/schedule';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    CacheModule.register({
+      isGlobal: true,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -34,6 +39,7 @@ import {ChatMessage} from '../db/entities/chatMessage.entity';
       }),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [],
