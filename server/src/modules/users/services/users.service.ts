@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {UpdateUserDto} from '../dto/update-user.dto';
 import {InjectRepository} from '@nestjs/typeorm';
-import {User} from '../../../../db/entities/user.entity';
+import {RoleEnum, User} from '../../../../db/entities/user.entity';
 import {Repository} from 'typeorm';
 import {getRandomHex} from '../../shared/utils/colors.utils';
 import * as bcrypt from 'bcrypt';
@@ -15,10 +15,12 @@ export class UsersService {
   public async create(login: string, password: string) {
     const saltOrRounds = 10;
     const cryptPassword = await bcrypt.hash(password, saltOrRounds);
+    const usersCount = await this.usersRepository.count();
     return this.usersRepository.save({
       nickname: login,
       nicknameColorHEX: getRandomHex(),
       password: cryptPassword,
+      role: usersCount === 0 ? RoleEnum.ADMIN : RoleEnum.USER,
     });
   }
 
