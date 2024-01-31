@@ -2,6 +2,7 @@ import {CanActivate, ExecutionContext, Injectable, Logger} from '@nestjs/common'
 import {Observable} from 'rxjs';
 import {Socket} from 'socket.io';
 import {verify} from 'jsonwebtoken';
+import {JwtData} from '../types/jwt.types';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 
