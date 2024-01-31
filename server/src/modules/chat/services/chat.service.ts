@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {Inject, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {ChatMessage} from '../../../../db/entities/chatMessage.entity';
@@ -7,6 +7,8 @@ import {UsersService} from '../../users/services/users.service';
 
 @Injectable()
 export class ChatService {
+  logger = new Logger(ChatService.name);
+
   constructor(
     @InjectRepository(ChatMessage)
     private readonly chatMessageRepository: Repository<ChatMessage>,
@@ -23,6 +25,10 @@ export class ChatService {
 
   async sendMessage(userId: number, message: string, client: Socket) {
     const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      this.logger.error(`User not found. UserId: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
     if (user.isMuted) {
       return client.emit('error', {status: 400, message: 'User is muted'});
     }
