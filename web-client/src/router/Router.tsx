@@ -1,6 +1,6 @@
 import {createBrowserRouter, RouterProvider} from 'react-router-dom';
-import ChatPage from '@/pages/chat.tsx';
-import LoginPage from '@/pages/login.tsx';
+import ChatPage from '@/pages/ChatPage.tsx';
+import LoginPage from '@/pages/LoginPage.tsx';
 import ProtectedRoute from '@/router/ProtectedRoute.tsx';
 
 const mainRouter = createBrowserRouter([
