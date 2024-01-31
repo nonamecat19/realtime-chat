@@ -3,6 +3,8 @@ import {ChatService} from '../services/chat.service';
 import {Server, Socket} from 'socket.io';
 import {ChatEvents} from '../types/chatEvents.types';
 import {UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
+import {Socket} from 'socket.io';
+import {ChatServer} from '../types/chatEvents.types';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
 import {getUserFromClient} from '../../shared/utils/socket.utils';
@@ -18,7 +20,7 @@ export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
 
   @WebSocketServer()
-  server: Server<any, ChatEvents> = null;
+  server: ChatServer = null;
 
   afterInit(client: Socket) {
     //TODO type improvement
