@@ -35,5 +35,6 @@ export class ChatService {
     });
     const result = await this.chatMessageRepository.save(newMessage);
     client.broadcast.emit('receiveMessage', result);
+    client.emit('receiveMessage', result);
   }
 }

@@ -6,7 +6,7 @@ import {UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
 import {getUserFromClient} from '../../shared/utils/socket.utils';
-import {SendMessageDto} from '../../dto/send-message.dto';
+import {SendMessageDto} from '../dto/send-message.dto';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
 
