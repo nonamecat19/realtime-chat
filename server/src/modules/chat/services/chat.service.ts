@@ -54,7 +54,7 @@ export class ChatService {
     const connectedClients = [...server.sockets.sockets.keys()];
     const onlineUsersList = new Set();
     for (const client of connectedClients) {
-      const user = await this.redis.get(client);
+      const user = await this.redis.get(`user-${client}`);
       if (!user) {
         continue;
       }
