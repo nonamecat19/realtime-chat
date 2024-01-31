@@ -5,3 +5,11 @@ services:
       - .env
     ports:
       - '3306:3306'
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+volumes:
+  redis-data:

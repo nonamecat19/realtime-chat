@@ -12,6 +12,8 @@ import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.deco
 import {CACHE_MANAGER, Cache} from '@nestjs/cache-manager';
 import {ReservedOrUserListener} from 'socket.io/dist/typed-events';
 import {UsersServer} from '../types/usersEvents.types';
+import Redis from 'ioredis';
+import {InjectRedis} from '@nestjs-modules/ioredis';
 
 @BaseWebSocketGateway()
 export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -19,8 +21,8 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly usersService: UsersService,
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache
+    @InjectRedis()
+    private readonly redis: Redis
   ) {}
 
   @WebSocketServer()
@@ -37,7 +39,7 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(client: ReservedOrUserListener<any, any, any>) {
     try {
-      await this.cacheManager.del(client.id);
+      await this.redis.del(client.id);
       this.logger.log(`Disconnected: ${client.id}`);
     } catch (e) {
       this.logger.error(`handleDisconnect: ${e.message}`);

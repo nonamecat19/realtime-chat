@@ -4,6 +4,8 @@ import {Repository} from 'typeorm';
 import {ChatMessage} from '../../../../db/entities/chatMessage.entity';
 import {Socket} from 'socket.io';
 import {UsersService} from '../../users/services/users.service';
+import Redis from 'ioredis';
+import {InjectRedis} from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class ChatService {
@@ -12,7 +14,9 @@ export class ChatService {
   constructor(
     @InjectRepository(ChatMessage)
     private readonly chatMessageRepository: Repository<ChatMessage>,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    @InjectRedis()
+    private readonly redis: Redis
   ) {}
   async getLastMessages() {
     return await this.chatMessageRepository.find({

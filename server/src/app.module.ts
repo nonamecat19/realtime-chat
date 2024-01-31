@@ -8,20 +8,25 @@ import {User} from '../db/entities/user.entity';
 import {ChatModule} from './modules/chat/chat.module';
 import {JwtModule} from '@nestjs/jwt';
 import {ChatMessage} from '../db/entities/chatMessage.entity';
-import {CacheModule} from '@nestjs/cache-manager';
 import {ScheduleModule} from '@nestjs/schedule';
+import {RedisModule} from '@nestjs-modules/ioredis';
+import RedisConfig from './modules/shared/config/redis.config';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
-    CacheModule.register({
-      isGlobal: true,
+    RedisModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        type: 'single',
+        url: configService.getOrThrow<string>('redis.url'),
+      }),
+      inject: [ConfigService],
     }),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [AppConfig, DatabaseConfig, JwtConfig],
+      load: [AppConfig, DatabaseConfig, JwtConfig, RedisConfig],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
