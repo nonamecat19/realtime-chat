@@ -57,7 +57,7 @@ export default function MessageBlock({message, user, createdAt, online}: IProps)
             {user.isMuted ? <Badge variant="destructive">Muted</Badge> : null}
             {user.isBanned ? <Badge variant="destructive">Banned</Badge> : null}
           </div>
-          <span className="text-zinc-500">{format(createdAt, 'mm:hh')}</span>
+          <span className="text-zinc-500">{format(createdAt, 'hh:mm')}</span>
         </div>
         <div>{message}</div>
       </div>
