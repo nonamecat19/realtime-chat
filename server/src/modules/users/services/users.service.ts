@@ -29,7 +29,7 @@ export class UsersService {
   }
 
   public findAll() {
-    return `This action returns all users`;
+    return this.usersRepository.find();
   }
 
   public findOne(id: number) {
