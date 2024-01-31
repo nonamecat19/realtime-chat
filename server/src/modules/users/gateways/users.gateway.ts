@@ -3,6 +3,8 @@ import {UsersService} from '../services/users.service';
 import {UpdateUserDto} from '../dto/update-user.dto';
 import {Inject, Logger} from '@nestjs/common';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
+import {CACHE_MANAGER, Cache} from '@nestjs/cache-manager';
+import {ReservedOrUserListener} from 'socket.io/dist/typed-events';
 import {UsersServer} from '../types/usersEvents.types';
 
 @BaseWebSocketGateway()

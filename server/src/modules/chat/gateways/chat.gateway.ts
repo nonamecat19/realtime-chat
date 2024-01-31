@@ -1,10 +1,8 @@
 import {SubscribeMessage, WebSocketServer, MessageBody, ConnectedSocket} from '@nestjs/websockets';
 import {ChatService} from '../services/chat.service';
-import {Server, Socket} from 'socket.io';
-import {ChatEvents} from '../types/chatEvents.types';
-import {UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {Socket} from 'socket.io';
 import {ChatServer} from '../types/chatEvents.types';
+import {Logger, UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
 import {getUserFromClient} from '../../shared/utils/socket.utils';
