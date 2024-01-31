@@ -7,9 +7,7 @@ import {Forward} from 'lucide-react';
 export default function ChatFooter() {
   const [userMessage, setUserMessage] = useState<string>('');
   async function sendMessageHandle() {
-    SocketApi.socket?.emit('sendMessage', {message: userMessage}, () => {
-      console.log('sent');
-    });
+    SocketApi.socket?.emit('sendMessage', {message: userMessage});
   }
 
   return (

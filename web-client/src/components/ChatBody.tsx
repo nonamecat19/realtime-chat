@@ -1,15 +1,22 @@
 import MessageBlock from '@/components/MessageBlock.tsx';
-import {ChatMessage} from '@/types/chat.types.ts';
-import {useEffect, useState} from 'react';
+import {MappedChatMessage} from '@/types/chat.types.ts';
+import {useEffect} from 'react';
 import {SocketEvent, useSocketEvents} from '@/hooks/useSocketEvents.ts';
 import {SocketApi} from '@/api/socket.ts';
+import {useAtomValue, useSetAtom} from 'jotai';
+import {mappedMessagesAtom, messagesAtom, onlineAtom} from '@/store/chat.ts';
+import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
 
 export function ChatBody() {
-  const [online, setOnline] = useState<number[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const setOnline = useSetAtom(onlineAtom);
+  const setMessages = useSetAtom(messagesAtom);
+  const mappedMessages = useAtomValue(mappedMessagesAtom);
+
+  useConnectSocket();
 
   useEffect(() => {
-    SocketApi.socket?.emit('getMessages', {}, (data: ChatMessage[]) => {
+    SocketApi.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
+      console.log({data});
       setMessages(data);
     });
   }, []);
@@ -30,14 +37,6 @@ export function ChatBody() {
   ];
 
   useSocketEvents(events);
-
-  const mappedMessages: ChatMessage[] = messages.map(message => ({
-    ...message,
-    user: {
-      ...message.user,
-      online: online.includes(message.user.id),
-    },
-  }));
 
   return (
     <ul className="flex flex-col gap-5 mx-5 h-[calc(100vh-145px)] sm:h-[calc(100vh-125px)] overflow-x-scroll mb-3 pr-5">

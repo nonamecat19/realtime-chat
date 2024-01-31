@@ -1,12 +1,8 @@
 import {Sheet, SheetContent, SheetHeader, SheetTrigger} from '@/components/ui/sheet.tsx';
 import {AlignJustify} from 'lucide-react';
-import {MappedUser} from '@/types/user.types.ts';
 import UsersList from '@/components/UsersList.tsx';
 
-interface IProps {
-  users: MappedUser[];
-}
-export default function ChatHeader({users}: IProps) {
+export default function ChatHeader() {
   return (
     <header className="flex justify-between items-center h-16 sm:h-12 border-b">
       <h1 className="ml-5 text-4xl sm:text-2xl font-bold">Chat app</h1>
@@ -21,7 +17,7 @@ export default function ChatHeader({users}: IProps) {
               <h2 className="text-2xl font-bold mb-5">Users</h2>
             </SheetHeader>
             <div className="h-[calc(100vh-120px)] overflow-y-scroll">
-              <UsersList data={users} />
+              <UsersList />
             </div>
           </SheetContent>
         </Sheet>

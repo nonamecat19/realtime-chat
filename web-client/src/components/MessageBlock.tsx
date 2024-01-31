@@ -1,4 +1,4 @@
-import {ChatMessage} from '@/types/chat.types.ts';
+import {MappedChatMessage} from '@/types/chat.types.ts';
 import {format} from 'date-fns';
 import {Avatar, AvatarFallback, AvatarImage} from './ui/avatar';
 import {Badge} from '@/components/ui/badge.tsx';
@@ -6,7 +6,7 @@ import {cn} from '@/lib/utils.ts';
 import {HoverCard, HoverCardContent, HoverCardTrigger} from './ui/hover-card';
 import {CalendarDays} from 'lucide-react';
 
-interface IProps extends ChatMessage {}
+interface IProps extends MappedChatMessage {}
 export default function MessageBlock({message, user, createdAt}: IProps) {
   return (
     <li className="p-2 bg-zinc-50 shadow-md border-2 border-zinc-200 rounded-lg flex gap-5">
