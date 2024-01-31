@@ -1,23 +1,12 @@
 import {Sheet, SheetContent, SheetHeader, SheetTrigger} from '@/components/ui/sheet.tsx';
 import {AlignJustify} from 'lucide-react';
-import {User} from '@/types/user.types.ts';
+import {MappedUser} from '@/types/user.types.ts';
 import UsersList from '@/components/UsersList.tsx';
 
-const usersMock: (User & {online: boolean})[] = new Array(10).fill(null).map(() => {
-  return {
-    id: Math.random(),
-    role: 'USER',
-    nickname: 'asdfwe rwe rjlkjlsaf',
-    nicknameColorHEX: '#000000',
-    isBanned: false,
-    isMuted: false,
-    online: Math.random() > 0.5,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-});
-
-export default function ChatHeader() {
+interface IProps {
+  users: MappedUser[];
+}
+export default function ChatHeader({users}: IProps) {
   return (
     <header className="flex justify-between items-center h-16 sm:h-12 border-b">
       <h1 className="ml-5 text-4xl sm:text-2xl font-bold">Chat app</h1>
@@ -31,7 +20,7 @@ export default function ChatHeader() {
             <SheetHeader>
               <h2 className="text-2xl font-bold mb-5">Users</h2>
             </SheetHeader>
-            <UsersList data={usersMock} />
+            <UsersList data={users} />
           </SheetContent>
         </Sheet>
       </div>

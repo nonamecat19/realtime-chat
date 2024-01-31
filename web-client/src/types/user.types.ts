@@ -10,3 +10,5 @@ export type User = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type MappedUser = User & {online: boolean};

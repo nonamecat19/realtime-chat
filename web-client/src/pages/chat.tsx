@@ -6,28 +6,16 @@ import {Input} from '@/components/ui/input.tsx';
 import {Button} from '@/components/ui/button.tsx';
 import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
 import UsersList from '@/components/UsersList.tsx';
-import {User} from '@/types/user.types.ts';
+import {MappedUser, User} from '@/types/user.types.ts';
 import ChatHeader from '@/components/ChatHeader.tsx';
 import {Separator} from '@/components/ui/separator.tsx';
 import MessageBlock from '@/components/MessageBlock.tsx';
 
-const usersMock: (User & {online: boolean})[] = new Array(10).fill(null).map(() => {
-  return {
-    id: Math.random(),
-    role: 'USER',
-    nickname: 'asdfwe rwe rjlkjlsaf',
-    nicknameColorHEX: '#000000',
-    isBanned: false,
-    isMuted: false,
-    online: Math.random() > 0.5,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-});
-
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState<string>('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [online, setOnline] = useState<number[]>([]);
 
   const events: SocketEvent[] = [
     {
@@ -36,14 +24,42 @@ export default function ChatPage() {
         setMessages(prev => [...prev, data]);
       },
     },
+    {
+      name: 'online',
+      handler: data => {
+        setOnline(data);
+      },
+    },
+    {
+      name: 'error',
+      handler: data => {
+        console.error(data);
+      },
+    },
   ];
 
   useSocketEvents(events);
   useConnectSocket();
 
+  const mappedUsers: MappedUser[] = users.map(user => ({
+    ...user,
+    online: online.includes(user.id),
+  }));
+
+  const mappedMessages: ChatMessage[] = messages.map(message => ({
+    ...message,
+    user: {
+      ...message.user,
+      online: online.includes(message.user.id),
+    },
+  }));
+
   useEffect(() => {
     SocketApi.socket?.emit('getMessages', {}, (data: ChatMessage[]) => {
       setMessages(data);
+    });
+    SocketApi.socket?.emit('findAllUsers', {}, (data: User[]) => {
+      setUsers(data);
     });
   }, []);
 
@@ -57,10 +73,10 @@ export default function ChatPage() {
     <section className="flex flex-col">
       <div className="flex grow">
         <div className="grow">
-          <ChatHeader />
+          <ChatHeader users={mappedUsers} />
           <div className="flex flex-col gap-5 mx-5">
-            {messages.map(el => {
-              return <MessageBlock {...el} key={el.id} online={false} />;
+            {mappedMessages.map(el => {
+              return <MessageBlock {...el} key={el.id} />;
             })}
           </div>
           <Input value={userMessage} onChange={e => setUserMessage(e.target.value)} />
@@ -68,7 +84,7 @@ export default function ChatPage() {
         </div>
         <div className="hidden sm:flex w-72 gap-5 mr-5">
           <Separator orientation="vertical" />
-          <UsersList data={usersMock} />
+          <UsersList data={mappedUsers} />
         </div>
       </div>
     </section>

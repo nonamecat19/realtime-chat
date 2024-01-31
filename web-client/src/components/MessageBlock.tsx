@@ -6,10 +6,8 @@ import {cn} from '@/lib/utils.ts';
 import {HoverCard, HoverCardContent, HoverCardTrigger} from './ui/hover-card';
 import {CalendarDays} from 'lucide-react';
 
-interface IProps extends ChatMessage {
-  online: boolean;
-}
-export default function MessageBlock({message, user, createdAt, online}: IProps) {
+interface IProps extends ChatMessage {}
+export default function MessageBlock({message, user, createdAt}: IProps) {
   return (
     <div className="p-2 bg-zinc-50 shadow-md border-2 border-zinc-200 rounded-lg flex gap-5">
       <HoverCard>
@@ -20,7 +18,7 @@ export default function MessageBlock({message, user, createdAt, online}: IProps)
             <div
               className={cn(
                 'w-4 h-4 absolute bottom-0 right-0 rounded-tl-lg border-l border-t border-zinc-700',
-                online ? 'bg-green-600' : 'bg-zinc-500'
+                user.online ? 'bg-green-600' : 'bg-zinc-500'
               )}
             />
           </Avatar>
