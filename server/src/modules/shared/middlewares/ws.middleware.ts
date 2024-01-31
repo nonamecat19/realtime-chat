@@ -18,7 +18,7 @@ export const SocketAuthMiddleware = (): SocketIOMiddleware => {
         throw new UnauthorizedException('No token found');
       }
       const token: string = authorization.split(' ')[1];
-      verify(token, configService.get('JWT_SECRET'));
+      verify(token, configService.getOrThrow<string>('JWT_SECRET'));
       next();
     } catch (error) {
       logger.error(error);

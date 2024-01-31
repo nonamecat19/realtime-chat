@@ -5,16 +5,19 @@ import {LoginDto} from '../dto/login.dto';
 import {TokensResponseDto} from '../dto/tokens.response.dto';
 import {Request, Response} from 'express';
 import {JwtService} from '@nestjs/jwt';
-
-const REFRESH_TOKEN_KEY = 'refreshToken';
+import {ConfigService} from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
+  REFRESH_TOKEN: string;
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
-    private readonly jwtService: JwtService
-  ) {}
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
+  ) {
+    this.REFRESH_TOKEN = this.configService.get<string>('cookie.refreshToken');
+  }
 
   @HttpCode(200)
   @Post('/login')
@@ -33,7 +36,7 @@ export class AuthController {
     tokensDto.token = await this.authService.generateAccessJwtToken(data);
     const refreshToken = await this.authService.generateRefreshJwtToken(data);
 
-    res.cookie(REFRESH_TOKEN_KEY, refreshToken, {
+    res.cookie(this.REFRESH_TOKEN, refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -43,7 +46,7 @@ export class AuthController {
 
   @Post('/refresh')
   async refresh(@Res() res: Response, @Req() req: Request) {
-    const oldRefreshToken = req.cookies[REFRESH_TOKEN_KEY];
+    const oldRefreshToken = req.cookies[this.REFRESH_TOKEN];
 
     const result = this.jwtService.verify(oldRefreshToken);
     console.log({oldRefreshResult: result});
@@ -58,7 +61,7 @@ export class AuthController {
     tokensDto.token = await this.authService.generateAccessJwtToken(data);
     const refreshToken = await this.authService.generateRefreshJwtToken(data);
 
-    res.cookie(REFRESH_TOKEN_KEY, refreshToken, {
+    res.cookie(this.REFRESH_TOKEN, refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
