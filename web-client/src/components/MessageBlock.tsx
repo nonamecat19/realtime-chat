@@ -9,7 +9,7 @@ import {CalendarDays} from 'lucide-react';
 interface IProps extends ChatMessage {}
 export default function MessageBlock({message, user, createdAt}: IProps) {
   return (
-    <div className="p-2 bg-zinc-50 shadow-md border-2 border-zinc-200 rounded-lg flex gap-5">
+    <li className="p-2 bg-zinc-50 shadow-md border-2 border-zinc-200 rounded-lg flex gap-5">
       <HoverCard>
         <HoverCardTrigger asChild>
           <Avatar className="w-12 h-12 rounded-md cursor-pointer">
@@ -59,6 +59,6 @@ export default function MessageBlock({message, user, createdAt}: IProps) {
         </div>
         <div>{message}</div>
       </div>
-    </div>
+    </li>
   );
 }

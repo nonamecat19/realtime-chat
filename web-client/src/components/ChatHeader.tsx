@@ -20,7 +20,9 @@ export default function ChatHeader({users}: IProps) {
             <SheetHeader>
               <h2 className="text-2xl font-bold mb-5">Users</h2>
             </SheetHeader>
-            <UsersList data={users} />
+            <div className="h-[calc(100vh-120px)] overflow-y-scroll">
+              <UsersList data={users} />
+            </div>
           </SheetContent>
         </Sheet>
       </div>
