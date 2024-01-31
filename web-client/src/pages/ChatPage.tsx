@@ -9,6 +9,8 @@ import ChatHeader from '@/components/ChatHeader.tsx';
 import {Separator} from '@/components/ui/separator.tsx';
 import MessageBlock from '@/components/MessageBlock.tsx';
 import ChatFooter from '@/components/ChatFooter.tsx';
+import {toast} from 'sonner';
+import {ErrorMessage} from '@/types/global.types.ts';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -30,8 +32,8 @@ export default function ChatPage() {
     },
     {
       name: 'error',
-      handler: data => {
-        console.error(data);
+      handler: (data: ErrorMessage) => {
+        toast.error(data.message, {});
       },
     },
   ];
