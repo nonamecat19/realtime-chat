@@ -1,6 +1,7 @@
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
 import {CookieService} from '@/services/CookieService.ts';
 import {ConfigService} from '@/services/ConfigService.ts';
+import {NotificationService} from '@/services/NotificationService.ts';
 
 const request = axios.create({
   baseURL: ConfigService.apiUrl,
@@ -19,14 +20,15 @@ request.interceptors.request.use(
 );
 
 request.interceptors.response.use(
-  response => {
-    if (response.status === 401) {
-      //TODO to router redirect
-      window.location.href = '/login';
+  response => response,
+  (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      NotificationService.error('Wrong password');
+    } else {
+      NotificationService.error(error.message);
     }
-    return response;
-  },
-  error => Promise.reject(error)
+    Promise.reject(error);
+  }
 );
 
 export {request};

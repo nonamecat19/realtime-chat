@@ -7,6 +7,7 @@ import {request} from '@/api/axios.ts';
 import {CookieService} from '@/services/CookieService.ts';
 import {useNavigate} from 'react-router-dom';
 import {LoginFormInfer, LoginFormSchema} from '@/schemas/loginForm.ts';
+import {NotificationService} from '@/services/NotificationService.ts';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -24,13 +25,15 @@ export default function LoginPage() {
       const res = await request.post('/auth/login', data);
       const token = res?.data?.token;
       if (!token) {
-        throw new Error('Auth error');
+        NotificationService.error('Auth error');
       }
       new CookieService().setToken(token);
       navigate('/');
-    } catch (e) {
-      //TODO error handling
-      console.error(e);
+      NotificationService.success('Login successful');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        NotificationService.error(e.message);
+      }
     }
   }
 
