@@ -27,12 +27,6 @@ export class ChatService {
     );
   }
   async getLastMessages() {
-    return await this.chatMessageRepository.find({
-      relations: {
-        user: true,
-      },
-      take: 20,
-    });
     return (
       await this.chatMessageRepository.find({
         relations: {
