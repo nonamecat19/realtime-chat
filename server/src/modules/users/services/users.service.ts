@@ -38,18 +38,6 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  public findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  public update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  public remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
-
   async handleConnection(client: ReservedOrUserListener<any, any, any>) {
     try {
       this.logger.log(`Connected: ${client.id}`);

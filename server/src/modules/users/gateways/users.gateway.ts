@@ -36,19 +36,4 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   findAll() {
     return this.usersService.findAll();
   }
-
-  @SubscribeMessage('findOneUser')
-  findOne(@MessageBody() id: number) {
-    return this.usersService.findOne(id);
-  }
-
-  @SubscribeMessage('updateUser')
-  update(@MessageBody() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto.id, updateUserDto);
-  }
-
-  @SubscribeMessage('removeUser')
-  remove(@MessageBody() id: number) {
-    return this.usersService.remove(id);
-  }
 }
