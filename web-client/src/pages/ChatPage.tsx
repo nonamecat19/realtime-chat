@@ -11,7 +11,7 @@ import {ErrorMessage} from '@/types/global.types.ts';
 import {NotificationService} from '@/services/NotificationService.ts';
 import {ChatBody} from '@/components/ChatBody.tsx';
 import {useAtom, useSetAtom} from 'jotai';
-import {onlineAtom} from '@/store/chat.ts';
+import {messagesAtom, onlineAtom} from '@/store/chat.ts';
 import {useAtomValue} from 'jotai/index';
 import {userDataAtom, usersAtom} from '@/store/users.ts';
 import {useNavigate} from 'react-router-dom';
@@ -24,6 +24,7 @@ export default function ChatPage() {
 
   const [users, setUsers] = useAtom(usersAtom);
   const setOnline = useSetAtom(onlineAtom);
+  const setMessages = useSetAtom(messagesAtom);
 
   function updateUser(data: UpdateUserEvent) {
     const newUsers = structuredClone(users);
@@ -42,6 +43,15 @@ export default function ChatPage() {
       targetUser[key] = value;
     }
     setUsers(newUsers);
+  }
+
+  function reconnect() {
+    SocketApi.reconnect();
+    SocketApi.socket?.emit('getMessages', {}, (data: []) => {
+      console.log({data});
+      setMessages(data);
+    });
+    NotificationService.success('Connection established');
   }
 
   const events: SocketEvent[] = [
@@ -67,6 +77,18 @@ export default function ChatPage() {
       name: 'updateUser',
       handler: (data: UpdateUserEvent) => {
         updateUser(data);
+      },
+    },
+    {
+      name: 'disconnect',
+      handler: () => {
+        NotificationService.error('Disconnected', {
+          duration: 50000,
+          action: {
+            label: 'Reconnect',
+            onClick: reconnect,
+          },
+        });
       },
     },
   ];

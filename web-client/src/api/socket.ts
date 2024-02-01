@@ -44,4 +44,9 @@ export class SocketApi {
       this.socket = null;
     }
   }
+
+  static reconnect() {
+    this.closeConnection();
+    this.createConnection();
+  }
 }
