@@ -1,11 +1,11 @@
 import {UsersListElement} from '@/components/UsersListElement.tsx';
 import {Separator} from '@/components/ui/separator.tsx';
 import {useAtomValue} from 'jotai';
-import {mappedOnlineUsersAtom} from '@/store/chat.ts';
+import {mappedOfflineUsersAtom, mappedOnlineUsersAtom} from '@/store/chat.ts';
 
 export default function UsersList() {
   const mappedOnlineUsers = useAtomValue(mappedOnlineUsersAtom);
-  const mappedOfflineUsers = useAtomValue(mappedOnlineUsersAtom);
+  const mappedOfflineUsers = useAtomValue(mappedOfflineUsersAtom);
 
   return (
     <div className="flex flex-col gap-2 grow mt-3">
