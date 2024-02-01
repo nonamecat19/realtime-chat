@@ -10,6 +10,7 @@ import {SocketEvent, useSocketEvents} from '@/hooks/useSocketEvents.ts';
 import {ErrorMessage} from '@/types/global.types.ts';
 import {useEffect} from 'react';
 import {MappedChatMessage} from '@/types/chat.types.ts';
+import {CookieService} from '@/services/CookieService.ts';
 
 export default function useWebSocketChat() {
   const userData = useAtomValue(userDataAtom);
@@ -75,6 +76,9 @@ export default function useWebSocketChat() {
     {
       name: 'disconnect',
       handler: () => {
+        if (!new CookieService().getToken()) {
+          return;
+        }
         NotificationService.error('Disconnected', {
           duration: 50000,
           action: {

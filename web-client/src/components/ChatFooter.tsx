@@ -4,6 +4,7 @@ import {SocketApi} from '@/api/socket.ts';
 import {useState} from 'react';
 import {Forward, Timer} from 'lucide-react';
 import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
+import ProfileOptions from '@/components/ProfileOptions.tsx';
 
 export default function ChatFooter() {
   const [userMessage, setUserMessage] = useState<string>('');
@@ -21,6 +22,7 @@ export default function ChatFooter() {
 
   return (
     <footer className="flex py-2 px-5 gap-3 h-16">
+      <ProfileOptions />
       <Input
         onKeyDown={event => {
           if (event.key === 'Enter') {
