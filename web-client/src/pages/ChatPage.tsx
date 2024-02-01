@@ -12,9 +12,14 @@ import {NotificationService} from '@/services/NotificationService.ts';
 import {ChatBody} from '@/components/ChatBody.tsx';
 import {useSetAtom} from 'jotai';
 import {onlineAtom, usersAtom} from '@/store/chat.ts';
+import {useAtomValue} from 'jotai/index';
+import {userDataAtom} from '@/store/users.ts';
+import {useNavigate} from 'react-router-dom';
 
 export default function ChatPage() {
   useConnectSocket();
+  const userData = useAtomValue(userDataAtom);
+  const navigate = useNavigate();
 
   const setUsers = useSetAtom(usersAtom);
   const setOnline = useSetAtom(onlineAtom);
@@ -37,6 +42,9 @@ export default function ChatPage() {
   useSocketEvents(events);
 
   useEffect(() => {
+    if (!userData) {
+      navigate('/login');
+    }
     SocketApi.socket?.emit('findAllUsers', {}, (data: User[]) => {
       setUsers(data);
     });
