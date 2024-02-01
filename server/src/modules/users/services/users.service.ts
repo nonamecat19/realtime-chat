@@ -77,8 +77,6 @@ export class UsersService {
 
   async findAllOnline(client: Socket) {
     const users = await this.usersRepository.find();
-    const allRedisData = await getAllRedisData(this.redis, 'user-*');
-    console.log({allRedisData});
     const onlineId: number[] = [];
     const allCurrentConnections = getCurrentConnectionsFromClient(client);
     for (const connection of allCurrentConnections) {

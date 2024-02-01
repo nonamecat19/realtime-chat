@@ -22,11 +22,11 @@ export class AuthController {
   @Post('/login')
   public async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     let user = await this.authService.getUserByCredentials(loginDto);
-    if (user.isBanned) {
-      throw new ForbiddenException(['You banned']);
-    }
     if (!user) {
       user = await this.usersService.create(loginDto.login, loginDto.password);
+    }
+    if (user.isBanned) {
+      throw new ForbiddenException(['You banned']);
     }
     const {tokensDto, refreshToken} = await this.authService.getTokensByUser(user);
     res.cookie(this.REFRESH_TOKEN, refreshToken, {
