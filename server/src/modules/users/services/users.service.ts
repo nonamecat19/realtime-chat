@@ -48,6 +48,8 @@ export class UsersService {
       client.broadcast.emit('userLogin', user);
       this.logger.log(`Connected: ${client.id}`);
     } catch (e) {
+      client.emit('error', {status: 401, message: e.message});
+      client.disconnect(true);
       this.logger.error(`handleConnection: ${e.message}`);
     }
   }

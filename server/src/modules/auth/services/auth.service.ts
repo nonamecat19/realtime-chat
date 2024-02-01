@@ -91,16 +91,16 @@ export class AuthService {
     const data = verify(noBearer, this.JWT_SECRET) as JwtData;
     if (typeof data === 'string') {
       this.logger.error('Wrong format for token: ', data);
-      throw new BadRequestException('Wrong format for token');
+      throw new UnauthorizedException('Wrong format for token');
     }
     const user = await this.usersRepository.findOne({where: {id: data.user.id}});
     if (!user) {
       this.logger.error('User not found');
-      throw new BadRequestException('User not found');
+      throw new UnauthorizedException('User not found');
     }
     if (user.isBanned) {
       this.logger.error('User is banned');
-      throw new BadRequestException('User is banned');
+      throw new UnauthorizedException('User is banned');
     }
     return data;
   }
