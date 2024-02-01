@@ -153,7 +153,6 @@ export default function useWebSocketChat() {
     if (!userData) {
       navigate('/login');
     }
-    console.log({userData});
     if (userData?.role === 'ADMIN') {
       SocketService.socket?.emit('findAllUsers', {}, (users: User[]) => {
         setUsers(users);
