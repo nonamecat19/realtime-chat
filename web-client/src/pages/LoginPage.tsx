@@ -8,9 +8,13 @@ import {CookieService} from '@/services/CookieService.ts';
 import {useNavigate} from 'react-router-dom';
 import {LoginFormInfer, LoginFormSchema} from '@/schemas/loginForm.ts';
 import {NotificationService} from '@/services/NotificationService.ts';
+import {useSetAtom} from 'jotai';
+import {userDataAtom} from '@/store/users.ts';
+import {LoginResponse} from '@/types/user.types.ts';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const setUserData = useSetAtom(userDataAtom);
 
   const form = useForm<LoginFormInfer>({
     resolver: zodResolver(LoginFormSchema),
@@ -22,11 +26,9 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormInfer) {
     try {
-      const res = await request.post('/auth/login', data);
+      const res = await request.post<LoginResponse>('/auth/login', data);
       const token = res?.data?.token;
-      if (!token) {
-        NotificationService.error('Auth error');
-      }
+      setUserData(res?.data.user);
       new CookieService().setToken(token);
       navigate('/');
       NotificationService.success('Login successful');

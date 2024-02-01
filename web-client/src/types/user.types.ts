@@ -12,3 +12,15 @@ export type User = {
 };
 
 export type MappedUser = User & {online: boolean};
+
+export type LoginUserData = {
+  id: number;
+  role: Role;
+  nickname: string;
+  isMuted: boolean;
+};
+
+export type LoginResponse = {
+  token: string;
+  user: LoginUserData;
+};
