@@ -1,5 +1,5 @@
 import {MappedChatMessage} from '@/types/chat.types.ts';
-import {format} from 'date-fns';
+import {addHours, format} from 'date-fns';
 import {Avatar, AvatarFallback, AvatarImage} from './ui/avatar';
 import {Badge} from '@/components/ui/badge.tsx';
 import {cn} from '@/lib/utils.ts';
@@ -55,7 +55,7 @@ export default function MessageBlock({message, user, createdAt}: IProps) {
             {user.isMuted ? <Badge variant="destructive">Muted</Badge> : null}
             {user.isBanned ? <Badge variant="destructive">Banned</Badge> : null}
           </div>
-          <span className="text-zinc-500">{format(createdAt, 'hh:mm')}</span>
+          <span className="text-zinc-500">{format(addHours(createdAt, 2), 'HH:mm')}</span>
         </div>
         <div>{message}</div>
       </div>
