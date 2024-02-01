@@ -123,9 +123,10 @@ export default function useWebSocketChat() {
       name: 'userLogout',
       handler: (userId: number) => {
         setOnline(online.filter(el => el !== userId));
-        SocketService.socket?.emit('findAllUsers', {}, (data: User[]) => {
-          setUsers(data);
-        });
+        if (userData?.role === 'ADMIN') {
+          return;
+        }
+        setUsers(users.filter(user => user.id !== userId));
       },
     },
   ];
@@ -136,9 +137,28 @@ export default function useWebSocketChat() {
     if (!userData) {
       navigate('/login');
     }
-    SocketService.socket?.emit('findAllUsers', {}, (data: User[]) => {
-      setUsers(data);
-    });
+    console.log({userData});
+    if (userData?.role === 'ADMIN') {
+      SocketService.socket?.emit('findAllUsers', {}, (users: User[]) => {
+        setUsers(users);
+      });
+      SocketService.socket?.emit('getOlineUsersId', {}, (usersId: number[]) => {
+        const newOnline = new Set([...usersId, userData!.id]);
+        setOnline([...newOnline]);
+      });
+    } else {
+      SocketService.socket?.emit('findAllOnlineUsers', {}, (data: User[]) => {
+        setUsers(data);
+        const usersId = data.map(user => {
+          return user.id;
+        });
+        const newOnline = new Set([...usersId, userData!.id]);
+        setOnline([...newOnline]);
+      });
+    }
+    if (!online.includes(userData!.id)) {
+      setOnline([...online, userData!.id]);
+    }
     SocketService.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
       setMessages(data);
     });
