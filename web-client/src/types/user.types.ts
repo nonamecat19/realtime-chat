@@ -24,3 +24,8 @@ export type LoginResponse = {
   token: string;
   user: LoginUserData;
 };
+
+export type UpdateUserEvent = {
+  userId: number;
+  update: Partial<User>;
+};
