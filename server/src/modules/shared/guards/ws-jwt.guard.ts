@@ -5,6 +5,7 @@ import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import {getAllRedisData} from '../utils/redis.utils';
 import {AuthService} from '../../auth/services/auth.service';
+import {getCurrentConnectionsFromClient} from '../utils/socket.utils';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -41,27 +42,27 @@ export class WsJwtGuard implements CanActivate {
 
   async handleRedis(dataFromToken: JwtData, client: Socket, cacheData: Record<any, any>) {
     const allData = await getAllRedisData(this.redis, 'user-*');
-    const socketsMap = client.nsp.sockets;
-    const socketsArray = Array.from(socketsMap, ([name, value]) => ({name, value}));
+    const socketsArray = getCurrentConnectionsFromClient(client);
 
     for (const [key, value] of Object.entries(allData)) {
       try {
         const deserialized = JSON.parse(value) as JwtData;
-        if (dataFromToken.user.id === deserialized.user.id) {
-          const socketId = key.replace('user-', '');
-          for (const socket of socketsArray) {
-            if (socket.name === socketId && socket.name !== client.id) {
-              this.logger.debug({
-                socketName: socket.name,
-                socketId,
-                clientId: client.id,
-                userId: deserialized.user.id,
-              });
-
-              socket.value.disconnect(true);
-              this.redis.del(`user-${socket.name}`);
-            }
+        if (dataFromToken.user.id !== deserialized.user.id) {
+          continue;
+        }
+        const socketId = key.replace('user-', '');
+        for (const socket of socketsArray) {
+          if (socket.name !== socketId || socket.name === client.id) {
+            continue;
           }
+          this.logger.debug({
+            socketName: socket.name,
+            socketId,
+            clientId: client.id,
+            userId: deserialized.user.id,
+          });
+          socket.value.disconnect(true);
+          this.redis.del(`user-${socket.name}`);
         }
       } catch (e) {
         this.logger.error(e);

@@ -9,7 +9,6 @@ import Redis from 'ioredis';
 import {Socket} from 'socket.io';
 import {JwtData} from '../../shared/types/jwt.types';
 import {AuthService} from '../../auth/services/auth.service';
-import {getAllRedisData} from '../../shared/utils/redis.utils';
 import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 
 @Injectable()

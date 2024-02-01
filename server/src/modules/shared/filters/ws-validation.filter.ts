@@ -16,12 +16,12 @@ export class WsExceptionFilter {
   }
 
   public handleError(client: Socket, exception: HttpException | WsException) {
-    if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      const message = (exception.getResponse() as IResponse)?.message || 'Internal Server Error';
-      client.emit('error', {status, message});
-    } else {
+    if (!(exception instanceof HttpException)) {
       console.log(exception);
+      return;
     }
+    const status = exception.getStatus();
+    const message = (exception.getResponse() as IResponse)?.message || 'Internal Server Error';
+    client.emit('error', {status, message});
   }
 }
