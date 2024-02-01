@@ -1,8 +1,9 @@
 import {io, Socket} from 'socket.io-client';
 import {CookieService} from '@/services/CookieService.ts';
 import {ConfigService} from '@/services/ConfigService.ts';
+import {NotificationService} from '@/services/NotificationService.ts';
 
-export class SocketApi {
+export class SocketService {
   static socket: null | Socket = null;
 
   static createConnection() {
@@ -24,17 +25,8 @@ export class SocketApi {
     });
 
     this.socket.on('connect_error', e => {
-      console.log('connect_error');
+      NotificationService.error('Connection error');
       console.error({connectError: e});
-    });
-
-    this.socket.on('connect', () => {
-      console.log('connect');
-    });
-
-    this.socket.on('disconnect', e => {
-      console.log('disconnect');
-      console.error({disconnectError: e});
     });
   }
 

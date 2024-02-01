@@ -4,13 +4,13 @@ import {useNavigate} from 'react-router-dom';
 import {messagesAtom, onlineAtom} from '@/store/chat.ts';
 import {UpdateUserEvent, User} from '@/types/user.types.ts';
 import {Entries} from '@/types/utils.types.ts';
-import {SocketApi} from '@/api/socket.ts';
 import {NotificationService} from '@/services/NotificationService.ts';
 import {SocketEvent, useSocketEvents} from '@/hooks/useSocketEvents.ts';
 import {ErrorMessage} from '@/types/global.types.ts';
 import {useEffect} from 'react';
 import {MappedChatMessage} from '@/types/chat.types.ts';
 import {CookieService} from '@/services/CookieService.ts';
+import {SocketService} from '@/services/SocketService.ts';
 
 export default function useWebSocketChat() {
   const userData = useAtomValue(userDataAtom);
@@ -40,8 +40,8 @@ export default function useWebSocketChat() {
   }
 
   function reconnect() {
-    SocketApi.reconnect();
-    SocketApi.socket?.emit('getMessages', {}, (data: []) => {
+    SocketService.reconnect();
+    SocketService.socket?.emit('getMessages', {}, (data: []) => {
       console.log({data});
       setMessages(data);
     });
@@ -96,10 +96,10 @@ export default function useWebSocketChat() {
     if (!userData) {
       navigate('/login');
     }
-    SocketApi.socket?.emit('findAllUsers', {}, (data: User[]) => {
+    SocketService.socket?.emit('findAllUsers', {}, (data: User[]) => {
       setUsers(data);
     });
-    SocketApi.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
+    SocketService.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
       setMessages(data);
     });
   }, []);

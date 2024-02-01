@@ -1,10 +1,10 @@
 import {Input} from '@/components/ui/input.tsx';
 import {Button} from '@/components/ui/button.tsx';
-import {SocketApi} from '@/api/socket.ts';
 import {useState} from 'react';
 import {Forward, Timer} from 'lucide-react';
 import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
 import ProfileOptions from '@/components/ProfileOptions.tsx';
+import {SocketService} from '@/services/SocketService.ts';
 
 export default function ChatFooter() {
   const [userMessage, setUserMessage] = useState<string>('');
@@ -12,7 +12,7 @@ export default function ChatFooter() {
   const [onTimeout, setOnTimeout] = useState<boolean>(false);
 
   function sendMessageHandle() {
-    SocketApi.socket?.emit('sendMessage', {message: userMessage});
+    SocketService.socket?.emit('sendMessage', {message: userMessage});
     setUserMessage('');
     setOnTimeout(true);
     setTimeout(() => {

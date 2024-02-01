@@ -5,7 +5,7 @@ import {useAtomValue} from 'jotai';
 import {userDataAtom} from '@/store/users.ts';
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover.tsx';
 import {Button} from '@/components/ui/button.tsx';
-import {SocketApi} from '@/api/socket.ts';
+import {SocketService} from '@/services/SocketService.ts';
 
 const STATUS_TYPE = {
   BAN: 'BAN',
@@ -31,7 +31,7 @@ export function UsersListElement({
   const isAdmin = userData?.role === 'ADMIN';
 
   function setStatus(type: keyof typeof STATUS_TYPE, status: boolean) {
-    SocketApi.socket?.emit(MESSAGE_BY_STATUS[type], {status, userId: id});
+    SocketService.socket?.emit(MESSAGE_BY_STATUS[type], {status, userId: id});
   }
 
   function AdminButtons() {
