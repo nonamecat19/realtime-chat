@@ -38,7 +38,11 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket
   ) {
     const user = getUserFromClient(client);
-    await this.chatService.sendMessage(user.id, sendMessageDto.message, client);
+    const trimmed = sendMessageDto.message.trim();
+    if (trimmed.length < 1) {
+      return client.emit('error', {status: 400, message: 'Message must not be empty'});
+    }
+    await this.chatService.sendMessage(user.id, trimmed, client);
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
