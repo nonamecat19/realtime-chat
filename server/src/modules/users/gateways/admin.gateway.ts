@@ -45,4 +45,9 @@ export class AdminGateway {
     });
     client.emit('success');
   }
+
+  @SubscribeMessage('findAllUsers')
+  findAll() {
+    return this.adminService.findAll();
+  }
 }

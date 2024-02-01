@@ -52,4 +52,8 @@ export class AdminService {
       }
     );
   }
+
+  public findAll() {
+    return this.usersRepository.find();
+  }
 }

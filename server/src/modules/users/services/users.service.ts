@@ -9,6 +9,8 @@ import Redis from 'ioredis';
 import {Socket} from 'socket.io';
 import {JwtData} from '../../shared/types/jwt.types';
 import {AuthService} from '../../auth/services/auth.service';
+import {getAllRedisData} from '../../shared/utils/redis.utils';
+import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 
 @Injectable()
 export class UsersService {
@@ -36,17 +38,21 @@ export class UsersService {
     return this.usersRepository.findOne({where: {id: userId}});
   }
 
-  public findAll() {
-    return this.usersRepository.find();
-  }
-
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.headers.authorization;
       const tokenData = await this.authService.verifyBearerToken(token);
+
       const user = await this.findOneById(tokenData.user.id);
-      client.broadcast.emit('userLogin', user);
-      this.logger.log(`Connected: ${client.id}`);
+      const cacheData = {
+        ...tokenData,
+        timestamp: new Date(),
+      };
+      this.redis.set(`user-${client.id}`, JSON.stringify(cacheData));
+      setTimeout(() => {
+        client.broadcast.emit('userLogin', user);
+        this.logger.log(`Connected: ${client.id}`);
+      }, 500);
     } catch (e) {
       client.emit('error', {status: 401, message: e.message});
       client.disconnect(true);
@@ -67,5 +73,21 @@ export class UsersService {
     } catch (e) {
       this.logger.error(`handleDisconnect: ${e.message}`);
     }
+  }
+
+  async findAllOnline(client: Socket) {
+    const users = await this.usersRepository.find();
+    const allRedisData = await getAllRedisData(this.redis, 'user-*');
+    console.log({allRedisData});
+    const onlineId: number[] = [];
+    const allCurrentConnections = getCurrentConnectionsFromClient(client);
+    for (const connection of allCurrentConnections) {
+      const redisData = await this.redis.get(`user-${connection.name}`);
+      if (!redisData) {
+        continue;
+      }
+      onlineId.push(JSON.parse(redisData).user.id);
+    }
+    return users.filter(user => onlineId.includes(user.id));
   }
 }

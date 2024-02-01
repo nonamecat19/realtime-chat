@@ -45,9 +45,15 @@ export class ChatGateway {
     await this.chatService.sendMessage(user.id, trimmed, client);
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async handleCron() {
-    await this.chatService.broadcastOnlineStatus(this.server);
+    const usersId = await this.chatService.getOlineUsersId(this.server);
+    this.server.emit('online', usersId);
     this.logger.log('Users notified');
+  }
+
+  @SubscribeMessage('getOlineUsersId')
+  async getOlineUsersId() {
+    return this.chatService.getOlineUsersId(this.server);
   }
 }

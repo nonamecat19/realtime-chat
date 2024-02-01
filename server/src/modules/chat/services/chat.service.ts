@@ -72,9 +72,9 @@ export class ChatService {
     await this.redis.set(`lastMessage-${client.id}`, new Date().toString());
   }
 
-  async broadcastOnlineStatus(server: ChatServer) {
+  async getOlineUsersId(server: ChatServer): Promise<number[]> {
     const connectedClients = [...server.sockets.sockets.keys()];
-    const onlineUsersList = new Set();
+    const onlineUsersList = new Set<number>();
     for (const client of connectedClients) {
       const user = await this.redis.get(`user-${client}`);
       if (!user) {
@@ -83,6 +83,6 @@ export class ChatService {
       const userData: JwtData = JSON.parse(user);
       onlineUsersList.add(userData.user.id);
     }
-    server.emit('online', [...onlineUsersList]);
+    return [...onlineUsersList];
   }
 }
