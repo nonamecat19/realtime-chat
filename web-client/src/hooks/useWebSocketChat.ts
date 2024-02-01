@@ -58,6 +58,20 @@ export default function useWebSocketChat() {
     {
       name: 'error',
       handler: (data: ErrorMessage) => {
+        if (data.status === 401) {
+          new CookieService().deleteToken();
+          navigate('/login');
+          NotificationService.error('Auth error');
+          return;
+        }
+        if (data.status === 403) {
+          NotificationService.error('Permission error');
+          return;
+        }
+        if (data.status >= 500) {
+          NotificationService.error('Server error');
+          return;
+        }
         NotificationService.error(data.message);
       },
     },
