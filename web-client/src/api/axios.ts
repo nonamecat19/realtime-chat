@@ -19,15 +19,30 @@ request.interceptors.request.use(
   error => Promise.reject(error)
 );
 
+type AxiosErrorWithMessages = {
+  error: string;
+  message: string[];
+  statusCode: number;
+};
+
 request.interceptors.response.use(
   response => response,
-  (error: AxiosError) => {
+  (error: AxiosError<AxiosErrorWithMessages>) => {
     if (error.response?.status === 401) {
       NotificationService.error('Wrong password');
     } else {
-      NotificationService.error(error.message);
+      const messages = error.response?.data?.message ?? [];
+
+      if (!messages || messages.length === 0) {
+        NotificationService.error(error.message);
+      } else {
+        for (const message of messages) {
+          NotificationService.error(message);
+        }
+      }
     }
-    Promise.reject(error);
+
+    Promise.reject(error).then();
   }
 );
 
