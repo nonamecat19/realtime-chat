@@ -37,14 +37,27 @@ export class WsJwtGuard implements CanActivate {
 
   async handleRedis(dataFromToken: JwtData, client: Socket, cacheData: Record<any, any>) {
     const allData = await getAllRedisData(this.redis, 'user-*');
-    this.logger.debug('getAllRedisData', allData);
+    const socketsMap = client.nsp.sockets;
+    const socketsArray = Array.from(socketsMap, ([name, value]) => ({name, value}));
 
     for (const [key, value] of Object.entries(allData)) {
       try {
         const deserialized = JSON.parse(value) as JwtData;
-        console.log({key, deserialized});
         if (dataFromToken.user.id === deserialized.user.id) {
-          //TODO: implement close socket
+          const socketId = key.replace('user-', '');
+          for (const socket of socketsArray) {
+            if (socket.name !== socketId && socket.name !== client.id) {
+              this.logger.debug({
+                socketName: socket.name,
+                socketId,
+                clientId: client.id,
+                userId: deserialized.user.id,
+              });
+
+              socket.value.disconnect(true);
+              this.redis.del(`user-${socket.name}`);
+            }
+          }
         }
       } catch (e) {
         this.logger.error(e);
@@ -53,7 +66,6 @@ export class WsJwtGuard implements CanActivate {
 
     try {
       this.redis.set(`user-${client.id}`, JSON.stringify(cacheData));
-      this.logger.debug('Cache data:', cacheData);
     } catch (e) {
       this.logger.error(`Cache set error ${e.message()}`);
     }

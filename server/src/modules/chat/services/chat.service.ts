@@ -42,7 +42,6 @@ export class ChatService {
 
   async sendMessage(userId: number, message: string, client: Socket) {
     const lastMessageTime = await this.redis.get(`lastMessage-${client.id}`);
-    console.log(`lastMessage-${client.id}`);
     if (lastMessageTime) {
       const lastMessageDate = new Date(lastMessageTime);
       const currentDate = new Date();
