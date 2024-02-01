@@ -6,6 +6,8 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {User} from '../../../../db/entities/user.entity';
 import {Repository} from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import {TokensResponseDto} from '../dto/tokens.response.dto';
+import {TokenData} from '../../shared/types/jwt.types';
 
 @Injectable()
 export class AuthService {
@@ -42,6 +44,7 @@ export class AuthService {
         id: true,
         password: true,
         role: true,
+        isMuted: true,
       },
     });
     if (!user) {
@@ -54,5 +57,22 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  public async getTokensByUser(
+    user: TokenData
+  ): Promise<{tokensDto: TokensResponseDto; refreshToken: string}> {
+    const data = {
+      id: user.id,
+      role: user.role,
+      nickname: user.nickname,
+      isMuted: user.isMuted,
+    };
+
+    const tokensDto = new TokensResponseDto();
+    tokensDto.token = await this.generateAccessJwtToken(data);
+    tokensDto.user = data;
+    const refreshToken = await this.generateRefreshJwtToken(data);
+    return {tokensDto, refreshToken};
   }
 }

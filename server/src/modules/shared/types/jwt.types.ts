@@ -9,3 +9,10 @@ export type JwtData = {
   iat: number;
   exp: number;
 };
+
+export type TokenData = {
+  id: number;
+  role: keyof typeof RoleEnum;
+  nickname: string;
+  isMuted: boolean;
+};
