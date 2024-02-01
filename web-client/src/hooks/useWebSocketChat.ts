@@ -1,4 +1,4 @@
-import {useAtom, useAtomValue, useSetAtom} from 'jotai/index';
+import {useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {userDataAtom, usersAtom} from '@/store/users.ts';
 import {useNavigate} from 'react-router-dom';
 import {messagesAtom, onlineAtom} from '@/store/chat.ts';
@@ -17,7 +17,7 @@ export default function useWebSocketChat() {
   const navigate = useNavigate();
 
   const [users, setUsers] = useAtom(usersAtom);
-  const setOnline = useSetAtom(onlineAtom);
+  const [online, setOnline] = useAtom(onlineAtom);
   const setMessages = useSetAtom(messagesAtom);
 
   function updateUser(data: UpdateUserEvent) {
@@ -99,6 +99,32 @@ export default function useWebSocketChat() {
             label: 'Reconnect',
             onClick: reconnect,
           },
+        });
+      },
+    },
+    {
+      name: 'userLogin',
+      handler: (newUser: User) => {
+        const userIndex = users.findIndex(user => user.id === newUser.id);
+        if (userIndex === -1) {
+          setUsers(prev => [...prev, newUser]);
+        } else {
+          const oldUser = structuredClone(users);
+          oldUser[userIndex] = newUser;
+          setUsers(oldUser);
+        }
+        if (online.includes(newUser.id)) {
+          return;
+        }
+        setOnline([...online, newUser.id]);
+      },
+    },
+    {
+      name: 'userLogout',
+      handler: (userId: number) => {
+        setOnline(online.filter(el => el !== userId));
+        SocketService.socket?.emit('findAllUsers', {}, (data: User[]) => {
+          setUsers(data);
         });
       },
     },
