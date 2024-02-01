@@ -1,4 +1,4 @@
-import {useAtom, useAtomValue, useSetAtom} from 'jotai';
+import {useAtom} from 'jotai';
 import {userDataAtom, usersAtom} from '@/store/users.ts';
 import {useNavigate} from 'react-router-dom';
 import {messagesAtom, onlineAtom} from '@/store/chat.ts';
@@ -13,12 +13,12 @@ import {CookieService} from '@/services/CookieService.ts';
 import {SocketService} from '@/services/SocketService.ts';
 
 export default function useWebSocketChat() {
-  const userData = useAtomValue(userDataAtom);
+  const [userData, setUserData] = useAtom(userDataAtom);
   const navigate = useNavigate();
 
   const [users, setUsers] = useAtom(usersAtom);
   const [online, setOnline] = useAtom(onlineAtom);
-  const setMessages = useSetAtom(messagesAtom);
+  const [messages, setMessages] = useAtom(messagesAtom);
 
   function updateUser(data: UpdateUserEvent) {
     const newUsers = structuredClone(users);
@@ -36,6 +36,22 @@ export default function useWebSocketChat() {
       // @ts-expect-error
       targetUser[key] = value;
     }
+    if (data?.userId === userData?.id) {
+      setUserData({...userData, ...data.update});
+    }
+    const newMessages = messages.map(message => {
+      if (message.user.id !== data.userId) {
+        return message;
+      }
+      return {
+        ...message,
+        user: {
+          ...message.user,
+          ...data.update,
+        },
+      };
+    });
+    setMessages(newMessages);
     setUsers(newUsers);
   }
 
@@ -156,7 +172,7 @@ export default function useWebSocketChat() {
         setOnline([...newOnline]);
       });
     }
-    if (!online.includes(userData!.id)) {
+    if (userData && !online.includes(userData?.id ?? -1)) {
       setOnline([...online, userData!.id]);
     }
     SocketService.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
