@@ -1,18 +1,19 @@
 import {CanActivate, ExecutionContext, Injectable, Logger} from '@nestjs/common';
 import {Observable} from 'rxjs';
 import {Socket} from 'socket.io';
-import {verify} from 'jsonwebtoken';
 import {JwtData} from '../types/jwt.types';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import {getAllRedisData} from '../utils/redis.utils';
+import {AuthService} from '../../auth/services/auth.service';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
   logger = new Logger(WsJwtGuard.name);
   constructor(
     @InjectRedis()
-    private readonly redis: Redis
+    private readonly redis: Redis,
+    private readonly authService: AuthService
   ) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
@@ -23,8 +24,7 @@ export class WsJwtGuard implements CanActivate {
     const client: Socket = context.switchToWs().getClient();
     const {authorization} = client.handshake.headers;
 
-    const token: string = authorization.split(' ')[1];
-    const dataFromToken = verify(token, 'secret') as JwtData;
+    const dataFromToken = this.authService.verifyBearerToken(authorization);
     client.data.user = dataFromToken;
     const cacheData = {
       ...dataFromToken,
