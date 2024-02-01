@@ -9,10 +9,14 @@ function atomWithLocalStorage<T = unknown>(
 ): WritableAtom<T, [update: T], void> {
   const getInitialValue = () => {
     const item = localStorage.getItem(key);
-    if (item !== null) {
-      return JSON.parse(item);
+    if (item === null) {
+      return initialValue;
     }
-    return initialValue;
+    try {
+      return JSON.parse(item);
+    } catch {
+      return initialValue;
+    }
   };
   const baseAtom = atom(getInitialValue());
   return atom(
