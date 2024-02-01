@@ -6,7 +6,6 @@ export function BaseWebSocketGateway(options: Record<string, any> = {}) {
       origin: 'http://localhost:5173',
       ...options.cors,
     },
-    transports: ['websocket'],
     ...options,
   });
 }
