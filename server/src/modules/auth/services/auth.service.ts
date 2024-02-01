@@ -1,4 +1,4 @@
-import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {Injectable, Logger, UnauthorizedException} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {ConfigService} from '@nestjs/config';
 import {LoginDto} from '../dto/login.dto';
@@ -12,7 +12,9 @@ import {verify} from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
-  private readonly jwtSecret: string;
+  private readonly JWT_SECRET: string;
+  private readonly JWT_ACCESS_EXPIRE: string;
+  private readonly JWT_REFRESH_EXPIRE: string;
   private readonly logger: Logger = new Logger(AuthService.name);
   constructor(
     private readonly jwtService: JwtService,
@@ -20,22 +22,24 @@ export class AuthService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>
   ) {
-    this.jwtSecret = configService.getOrThrow('jwt.jwtSecret');
+    this.JWT_SECRET = configService.getOrThrow('jwt.jwtSecret');
+    this.JWT_ACCESS_EXPIRE = configService.getOrThrow('jwt.jwtAccessExpire');
+    this.JWT_REFRESH_EXPIRE = configService.getOrThrow('jwt.jwtRefreshExpire');
   }
 
   public async generateAccessJwtToken(user: any) {
     const payload = {user};
     return this.jwtService.sign(payload, {
-      secret: this.configService.getOrThrow('jwt.jwtSecret'),
-      expiresIn: this.configService.getOrThrow('jwt.jwtAccessExpire'),
+      secret: this.JWT_SECRET,
+      expiresIn: this.JWT_ACCESS_EXPIRE,
     });
   }
 
   public async generateRefreshJwtToken(user: any) {
     const payload = {user};
     return this.jwtService.sign(payload, {
-      secret: this.configService.getOrThrow('jwt.jwtSecret'),
-      expiresIn: this.configService.getOrThrow('jwt.jwtRefreshExpire'),
+      secret: this.JWT_SECRET,
+      expiresIn: this.JWT_REFRESH_EXPIRE,
     });
   }
 
@@ -83,7 +87,7 @@ export class AuthService {
 
   public verifyBearerToken(token: string): JwtData {
     const noBearer = token.split(' ')[1];
-    const data = verify(noBearer, this.jwtSecret);
+    const data = verify(noBearer, this.JWT_SECRET);
     if (typeof data === 'string') {
       this.logger.error('Wrong format for token: ', data);
       throw new Error('Wrong format for token');
