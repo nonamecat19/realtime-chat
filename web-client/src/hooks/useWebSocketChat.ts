@@ -29,7 +29,7 @@ export default function useWebSocketChat() {
     const fieldToUpdate = Object.entries(data.update) as Entries<Partial<User>>;
     for (const field of fieldToUpdate) {
       const [key, value] = field ?? [];
-      if (!field || !key || !value) {
+      if (!field || !key) {
         continue;
       }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
