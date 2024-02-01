@@ -33,6 +33,17 @@ export class ChatService {
       },
       take: 20,
     });
+    return (
+      await this.chatMessageRepository.find({
+        relations: {
+          user: true,
+        },
+        order: {
+          id: 'DESC',
+        },
+        take: 20,
+      })
+    ).reverse();
   }
 
   async sendMessage(userId: number, message: string, client: Socket) {
