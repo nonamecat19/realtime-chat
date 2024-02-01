@@ -7,16 +7,21 @@ import {User} from '../../../../db/entities/user.entity';
 import {Repository} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import {TokensResponseDto} from '../dto/tokens.response.dto';
-import {TokenData} from '../../shared/types/jwt.types';
+import {JwtData, TokenData} from '../../shared/types/jwt.types';
+import {verify} from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
+  private readonly jwtSecret: string;
+  private readonly logger: Logger = new Logger(AuthService.name);
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>
-  ) {}
+  ) {
+    this.jwtSecret = configService.getOrThrow('jwt.jwtSecret');
+  }
 
   public async generateAccessJwtToken(user: any) {
     const payload = {user};
@@ -74,5 +79,15 @@ export class AuthService {
     tokensDto.user = data;
     const refreshToken = await this.generateRefreshJwtToken(data);
     return {tokensDto, refreshToken};
+  }
+
+  public verifyBearerToken(token: string): JwtData {
+    const noBearer = token.split(' ')[1];
+    const data = verify(noBearer, this.jwtSecret);
+    if (typeof data === 'string') {
+      this.logger.error('Wrong format for token: ', data);
+      throw new Error('Wrong format for token');
+    }
+    return data as JwtData;
   }
 }

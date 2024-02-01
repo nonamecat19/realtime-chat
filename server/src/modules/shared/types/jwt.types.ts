@@ -1,11 +1,7 @@
 import {RoleEnum} from '../../../../db/entities/user.entity';
 
 export type JwtData = {
-  user: {
-    id: number;
-    role: keyof typeof RoleEnum;
-    nickname: string;
-  };
+  user: TokenData;
   iat: number;
   exp: number;
 };

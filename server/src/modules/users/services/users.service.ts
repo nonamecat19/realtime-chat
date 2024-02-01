@@ -1,13 +1,14 @@
 import {Injectable, Logger} from '@nestjs/common';
-import {UpdateUserDto} from '../dto/update-user.dto';
 import {InjectRepository} from '@nestjs/typeorm';
 import {RoleEnum, User} from '../../../../db/entities/user.entity';
 import {Repository} from 'typeorm';
 import {getRandomHex} from '../../shared/utils/colors.utils';
 import * as bcrypt from 'bcrypt';
-import {ReservedOrUserListener} from 'socket.io/dist/typed-events';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import {Socket} from 'socket.io';
+import {JwtData} from '../../shared/types/jwt.types';
+import {AuthService} from '../../auth/services/auth.service';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,8 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @InjectRedis()
-    private readonly redis: Redis
+    private readonly redis: Redis,
+    private readonly authService: AuthService
   ) {}
   public async create(login: string, password: string) {
     const saltOrRounds = 10;
@@ -38,17 +40,27 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  async handleConnection(client: ReservedOrUserListener<any, any, any>) {
+  async handleConnection(client: Socket) {
     try {
+      const token = client.handshake.headers.authorization;
+      const tokenData = this.authService.verifyBearerToken(token);
+      const user = await this.findOneById(tokenData.user.id);
+      client.broadcast.emit('userLogin', user);
       this.logger.log(`Connected: ${client.id}`);
     } catch (e) {
       this.logger.error(`handleConnection: ${e.message}`);
     }
   }
 
-  async handleDisconnect(client: ReservedOrUserListener<any, any, any>) {
+  async handleDisconnect(client: Socket) {
     try {
-      await this.redis.del(client.id);
+      const user = await this.redis.get(`user-${client.id}`);
+      if (!user) {
+        return;
+      }
+      const deserializedUser: JwtData = JSON.parse(user);
+      await this.redis.del(`user-${client.id}`);
+      client.broadcast.emit('userLogout', deserializedUser.user.id);
       this.logger.log(`Disconnected: ${client.id}`);
     } catch (e) {
       this.logger.error(`handleDisconnect: ${e.message}`);
