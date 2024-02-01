@@ -15,3 +15,8 @@ export function getUserFromClient(client: Socket): IUser {
   }
   return user;
 }
+
+export function getCurrentConnectionsFromClient(client: Socket): {name: string; value: Socket}[] {
+  const socketsMap = client.nsp.sockets;
+  return Array.from(socketsMap, ([name, value]) => ({name, value}));
+}

@@ -21,7 +21,7 @@ export class AdminGateway {
 
   @SubscribeMessage('setBanStatus')
   async setBanStatus(@MessageBody() setStatusDto: SetStatusDto, @ConnectedSocket() client: Socket) {
-    await this.adminService.setBanStatus(setStatusDto);
+    await this.adminService.setBanStatus(setStatusDto, client);
     this.server.emit('updateUser', {
       userId: setStatusDto.userId,
       update: {
