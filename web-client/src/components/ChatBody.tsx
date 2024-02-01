@@ -1,14 +1,11 @@
 import MessageBlock from '@/components/MessageBlock.tsx';
-import {MappedChatMessage} from '@/types/chat.types.ts';
-import {useEffect, useRef} from 'react';
+import {useRef} from 'react';
 import {SocketEvent, useSocketEvents} from '@/hooks/useSocketEvents.ts';
-import {SocketApi} from '@/api/socket.ts';
 import {useAtomValue, useSetAtom} from 'jotai';
-import {mappedMessagesAtom, messagesAtom, onlineAtom} from '@/store/chat.ts';
+import {mappedMessagesAtom, messagesAtom} from '@/store/chat.ts';
 import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
 
 export function ChatBody() {
-  const setOnline = useSetAtom(onlineAtom);
   const setMessages = useSetAtom(messagesAtom);
   const mappedMessages = useAtomValue(mappedMessagesAtom);
 
@@ -16,20 +13,7 @@ export function ChatBody() {
 
   useConnectSocket();
 
-  useEffect(() => {
-    SocketApi.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
-      console.log({data});
-      setMessages(data);
-    });
-  }, []);
-
   const events: SocketEvent[] = [
-    {
-      name: 'online',
-      handler: data => {
-        setOnline(data);
-      },
-    },
     {
       name: 'receiveMessage',
       handler: data => {
