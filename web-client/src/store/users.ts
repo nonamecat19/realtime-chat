@@ -1,9 +1,9 @@
 import {LoginUserData, MappedUser, User} from '@/types/user.types.ts';
 import {atom} from 'jotai';
-import {atomWithLocalStorage} from '@/store/utils.ts';
 import {onlineAtom} from '@/store/chat.ts';
 
-export const userDataAtom = atomWithLocalStorage<LoginUserData | null>('userData', null);
+// export const userDataAtom = atomWithLocalStorage<LoginUserData | null>('userData', null);
+export const userDataAtom = atom<LoginUserData | null>(null);
 
 export const usersAtom = atom<User[]>([]);
 

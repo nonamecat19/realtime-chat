@@ -39,14 +39,13 @@ export default function useWebSocketChat() {
     setUsers(newUsers);
   }
 
-  function reconnect() {
-    SocketService.reconnect();
-    SocketService.socket?.emit('getMessages', {}, (data: []) => {
-      console.log({data});
-      setMessages(data);
-    });
-    NotificationService.success('Connection established');
-  }
+  // function reconnect() {
+  //   SocketService.reconnect();
+  //   SocketService.socket?.emit('getMessages', {}, (data: []) => {
+  //     console.log({data});
+  //     setMessages(data);
+  //   });
+  // }
 
   const events: SocketEvent[] = [
     {
@@ -90,16 +89,17 @@ export default function useWebSocketChat() {
     {
       name: 'disconnect',
       handler: () => {
-        if (!new CookieService().getToken()) {
-          return;
-        }
-        NotificationService.error('Disconnected', {
-          duration: 50000,
-          action: {
-            label: 'Reconnect',
-            onClick: reconnect,
-          },
-        });
+        navigate('/login');
+        // if (!new CookieService().getToken()) {
+        //   return;
+        // }
+        // NotificationService.error('Disconnected', {
+        //   duration: 50000,
+        //   action: {
+        //     label: 'Reconnect',
+        //     onClick: reconnect,
+        //   },
+        // });
       },
     },
     {
