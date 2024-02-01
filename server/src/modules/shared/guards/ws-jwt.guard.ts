@@ -46,7 +46,7 @@ export class WsJwtGuard implements CanActivate {
         if (dataFromToken.user.id === deserialized.user.id) {
           const socketId = key.replace('user-', '');
           for (const socket of socketsArray) {
-            if (socket.name !== socketId && socket.name !== client.id) {
+            if (socket.name === socketId && socket.name !== client.id) {
               this.logger.debug({
                 socketName: socket.name,
                 socketId,
