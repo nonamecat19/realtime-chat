@@ -7,10 +7,10 @@ import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {AdminService} from '../services/admin.service';
 import {SetStatusDto} from '../dto/set-status.dto';
 import {Socket} from 'socket.io';
+import {AdminWsGuard} from '../../shared/guards/admin-ws.guard';
 
 @BaseWebSocketGateway()
-//TODO: guard
-@UseGuards(WsJwtGuard)
+@UseGuards(WsJwtGuard, AdminWsGuard)
 @UsePipes(ValidationPipe)
 @UseFilters(WsExceptionFilter)
 export class AdminGateway {
