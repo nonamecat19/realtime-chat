@@ -54,13 +54,13 @@ export class ChatService {
     const user = await this.usersService.findOneById(userId);
     if (!user) {
       this.logger.error(`User not found. UserId: ${userId}`);
-      return client.emit('error', {status: 404, message: 'User not found'});
+      return client.emit('error', {status: 401, message: 'Your account not found'});
     }
     if (user.isMuted) {
-      return client.emit('error', {status: 400, message: 'User is muted'});
+      return client.emit('error', {status: 400, message: 'You muted'});
     }
     if (user.isBanned) {
-      return client.emit('error', {status: 400, message: 'User is banned'});
+      return client.emit('error', {status: 401, message: 'You banned'});
     }
     const newMessage = this.chatMessageRepository.create({
       message,
