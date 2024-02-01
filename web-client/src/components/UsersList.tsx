@@ -1,7 +1,7 @@
 import {UsersListElement} from '@/components/UsersListElement.tsx';
 import {Separator} from '@/components/ui/separator.tsx';
 import {useAtomValue} from 'jotai';
-import {mappedOfflineUsersAtom, mappedOnlineUsersAtom} from '@/store/chat.ts';
+import {mappedOfflineUsersAtom, mappedOnlineUsersAtom} from '@/store/users.ts';
 
 export default function UsersList() {
   const mappedOnlineUsers = useAtomValue(mappedOnlineUsersAtom);

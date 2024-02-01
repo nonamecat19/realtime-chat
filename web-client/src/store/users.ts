@@ -1,30 +1,25 @@
-import {LoginUserData} from '@/types/user.types.ts';
-import {atom, WritableAtom} from 'jotai';
+import {LoginUserData, MappedUser, User} from '@/types/user.types.ts';
+import {atom} from 'jotai';
+import {atomWithLocalStorage} from '@/store/utils.ts';
+import {onlineAtom} from '@/store/chat.ts';
 
 export const userDataAtom = atomWithLocalStorage<LoginUserData | null>('userData', null);
 
-function atomWithLocalStorage<T = unknown>(
-  key: string,
-  initialValue: T
-): WritableAtom<T, [update: T], void> {
-  const getInitialValue = () => {
-    const item = localStorage.getItem(key);
-    if (item === null) {
-      return initialValue;
-    }
-    try {
-      return JSON.parse(item);
-    } catch {
-      return initialValue;
-    }
-  };
-  const baseAtom = atom(getInitialValue());
-  return atom(
-    get => get(baseAtom),
-    (get, set, update) => {
-      const nextValue = typeof update === 'function' ? update(get(baseAtom)) : update;
-      set(baseAtom, nextValue);
-      localStorage.setItem(key, JSON.stringify(nextValue));
-    }
-  );
-}
+export const usersAtom = atom<User[]>([]);
+
+export const mappedUsersAtom = atom<MappedUser[]>(get =>
+  get(usersAtom).map(user => {
+    return {
+      ...user,
+      online: get(onlineAtom).includes(user.id),
+    };
+  })
+);
+
+export const mappedOnlineUsersAtom = atom<MappedUser[]>(get =>
+  get(mappedUsersAtom).filter(user => user.online)
+);
+
+export const mappedOfflineUsersAtom = atom<MappedUser[]>(get =>
+  get(mappedUsersAtom).filter(user => !user.online)
+);
