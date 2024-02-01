@@ -1,5 +1,4 @@
 import {CanActivate, ExecutionContext, Injectable, Logger} from '@nestjs/common';
-import {Observable} from 'rxjs';
 import {Socket} from 'socket.io';
 import {JwtData} from '../types/jwt.types';
 import {InjectRedis} from '@nestjs-modules/ioredis';
@@ -16,22 +15,27 @@ export class WsJwtGuard implements CanActivate {
     private readonly authService: AuthService
   ) {}
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     if (context.getType() !== 'ws') {
       return true;
     }
 
     const client: Socket = context.switchToWs().getClient();
-    const {authorization} = client.handshake.headers;
+    try {
+      const {authorization} = client.handshake.headers;
 
-    const dataFromToken = this.authService.verifyBearerToken(authorization);
-    client.data.user = dataFromToken;
-    const cacheData = {
-      ...dataFromToken,
-      timestamp: new Date(),
-    };
+      const dataFromToken = await this.authService.verifyBearerToken(authorization);
+      client.data.user = dataFromToken;
+      const cacheData = {
+        ...dataFromToken,
+        timestamp: new Date(),
+      };
+      await this.handleRedis(dataFromToken, client, cacheData);
+    } catch (e) {
+      client.emit('error', {status: 401, message: 'User is banned'});
+      throw e;
+    }
 
-    this.handleRedis(dataFromToken, client, cacheData).then();
     return true;
   }
 

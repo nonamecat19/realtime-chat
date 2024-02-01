@@ -43,7 +43,7 @@ export class UsersService {
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.headers.authorization;
-      const tokenData = this.authService.verifyBearerToken(token);
+      const tokenData = await this.authService.verifyBearerToken(token);
       const user = await this.findOneById(tokenData.user.id);
       client.broadcast.emit('userLogin', user);
       this.logger.log(`Connected: ${client.id}`);

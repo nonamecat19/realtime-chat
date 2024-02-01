@@ -1,4 +1,4 @@
-import {Body, Controller, HttpCode, Post, Req, Res} from '@nestjs/common';
+import {Body, Controller, ForbiddenException, HttpCode, Post, Req, Res} from '@nestjs/common';
 import {UsersService} from '../../users/services/users.service';
 import {AuthService} from '../services/auth.service';
 import {LoginDto} from '../dto/login.dto';
@@ -22,6 +22,9 @@ export class AuthController {
   @Post('/login')
   public async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     let user = await this.authService.getUserByCredentials(loginDto);
+    if (user.isBanned) {
+      throw new ForbiddenException(['You banned']);
+    }
     if (!user) {
       user = await this.usersService.create(loginDto.login, loginDto.password);
     }

@@ -1,4 +1,4 @@
-import {Injectable, Logger, UnauthorizedException} from '@nestjs/common';
+import {BadRequestException, Injectable, Logger, UnauthorizedException} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {ConfigService} from '@nestjs/config';
 import {LoginDto} from '../dto/login.dto';
@@ -54,6 +54,7 @@ export class AuthService {
         password: true,
         role: true,
         isMuted: true,
+        isBanned: true,
       },
     });
     if (!user) {
@@ -85,13 +86,22 @@ export class AuthService {
     return {tokensDto, refreshToken};
   }
 
-  public verifyBearerToken(token: string): JwtData {
+  public async verifyBearerToken(token: string): Promise<JwtData> {
     const noBearer = token.split(' ')[1];
-    const data = verify(noBearer, this.JWT_SECRET);
+    const data = verify(noBearer, this.JWT_SECRET) as JwtData;
     if (typeof data === 'string') {
       this.logger.error('Wrong format for token: ', data);
-      throw new Error('Wrong format for token');
+      throw new BadRequestException('Wrong format for token');
     }
-    return data as JwtData;
+    const user = await this.usersRepository.findOne({where: {id: data.user.id}});
+    if (!user) {
+      this.logger.error('User not found');
+      throw new BadRequestException('User not found');
+    }
+    if (user.isBanned) {
+      this.logger.error('User is banned');
+      throw new BadRequestException('User is banned');
+    }
+    return data;
   }
 }
