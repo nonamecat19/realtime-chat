@@ -10,7 +10,7 @@ export default function ChatFooter() {
   useConnectSocket();
   const [onTimeout, setOnTimeout] = useState<boolean>(false);
 
-  async function sendMessageHandle() {
+  function sendMessageHandle() {
     SocketApi.socket?.emit('sendMessage', {message: userMessage});
     setUserMessage('');
     setOnTimeout(true);
@@ -21,7 +21,16 @@ export default function ChatFooter() {
 
   return (
     <footer className="flex py-2 px-5 gap-3 h-16">
-      <Input value={userMessage} onChange={e => setUserMessage(e.target.value)} className="h-12" />
+      <Input
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            sendMessageHandle();
+          }
+        }}
+        value={userMessage}
+        onChange={e => setUserMessage(e.target.value)}
+        className="h-12"
+      />
       <Button
         disabled={userMessage.length === 0 || onTimeout}
         onClick={sendMessageHandle}
