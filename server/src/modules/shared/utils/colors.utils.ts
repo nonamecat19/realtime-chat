@@ -1,7 +1,7 @@
 export function getRandomHex() {
   const hue = Math.floor(Math.random() * 360);
   const saturation = 100;
-  const lightness = 60;
+  const lightness = 40;
   return hslToHex(hue, saturation, lightness);
 }
 
