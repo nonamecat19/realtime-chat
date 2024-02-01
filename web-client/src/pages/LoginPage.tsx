@@ -27,6 +27,9 @@ export default function LoginPage() {
   async function onSubmit(data: LoginFormInfer) {
     try {
       const res = await request.post<LoginResponse>('/auth/login', data);
+      if (!res) {
+        return;
+      }
       const token = res?.data?.token;
       setUserData(res?.data.user);
       new CookieService().setToken(token);
