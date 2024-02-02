@@ -6,10 +6,8 @@ import {getRandomHex} from '../../shared/utils/colors.utils';
 import * as bcrypt from 'bcrypt';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
-import {Socket} from 'socket.io';
 import {JwtData, TokenData} from '../../shared/types/jwt.types';
 import {AuthService} from '../../auth/services/auth.service';
-import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 import {ErrorStatuses} from '../../shared/enums/error.enum';
 import {CurrentConnectionList} from '../../shared/types/socket.types';
 

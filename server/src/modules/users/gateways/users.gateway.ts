@@ -1,6 +1,5 @@
 import {
   SubscribeMessage,
-  WebSocketServer,
   OnGatewayDisconnect,
   OnGatewayConnection,
   ConnectedSocket,
@@ -8,8 +7,6 @@ import {
 import {UsersService} from '../services/users.service';
 import {Logger, UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
-import {ReservedOrUserListener} from 'socket.io/dist/typed-events';
-import {UsersServer} from '../types/usersEvents.types';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {Socket} from 'socket.io';
@@ -23,9 +20,6 @@ import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(UsersGateway.name);
   constructor(private readonly usersService: UsersService) {}
-
-  @WebSocketServer()
-  server: UsersServer;
 
   async handleConnection(client: Socket) {
     const token = client.handshake.headers.authorization;
