@@ -22,7 +22,7 @@ export class AuthController {
   @UseGuards(CsrfGuard)
   @HttpCode(200)
   @Post('/login')
-  public async login(@Body() loginDto: LoginDto, @Res() response: FastifyReply) {
+  public async login(@Body() loginDto: LoginDto, @Res() reply: FastifyReply) {
     let user = await this.authService.getUserByCredentials(loginDto);
     if (!user) {
       user = await this.usersService.create(loginDto.login, loginDto.password);
@@ -31,7 +31,7 @@ export class AuthController {
       throw new ForbiddenException(['You banned']);
     }
     const {tokensDto} = await this.authService.getTokensByUser(user);
-    response.send(tokensDto);
+    reply.send(tokensDto);
   }
 
   // @Post('/refresh')
