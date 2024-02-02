@@ -4,9 +4,9 @@ import {notificationService} from '@/services/NotificationService.ts';
 import {storageService} from '@/services/StorageService.ts';
 
 class SocketService {
-  socket: null | Socket = null;
+  public socket: null | Socket = null;
 
-  createConnection() {
+  public createConnection() {
     if (this.socket) {
       return;
     }
@@ -30,18 +30,17 @@ class SocketService {
     });
   }
 
-  closeConnection() {
+  public closeConnection() {
     this.socket?.close();
     if (this.socket) {
       this.socket = null;
     }
   }
 
-  reconnect() {
+  public reconnect() {
     this.closeConnection();
     this.createConnection();
   }
 }
 const socketService = new SocketService();
-Object.freeze(socketService);
 export {socketService};
