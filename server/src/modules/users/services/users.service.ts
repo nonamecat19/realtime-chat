@@ -7,10 +7,11 @@ import * as bcrypt from 'bcrypt';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import {Socket} from 'socket.io';
-import {JwtData} from '../../shared/types/jwt.types';
+import {JwtData, TokenData} from '../../shared/types/jwt.types';
 import {AuthService} from '../../auth/services/auth.service';
 import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 import {ErrorStatuses} from '../../shared/enums/error.enum';
+import {CurrentConnectionList} from '../../shared/types/socket.types';
 
 @Injectable()
 export class UsersService {
@@ -38,7 +39,7 @@ export class UsersService {
     return this.usersRepository.findOne({where: {id: userId}});
   }
 
-  async handleConnection(token: string, clientId: string): Promise<User | ErrorStatuses> {
+  async handleUserConnection(token: string, clientId: string): Promise<User | ErrorStatuses> {
     try {
       const tokenDataOrError = await this.authService.verifyBearerToken(token);
 
@@ -58,25 +59,27 @@ export class UsersService {
     }
   }
 
-  async handleDisconnect(client: Socket) {
+  async handleUserDisconnect(clientId: string): Promise<TokenData | ErrorStatuses> {
     try {
-      const user = await this.redis.get(`user-${client.id}`);
+      const user = await this.redis.get(`user-${clientId}`);
       if (!user) {
-        return;
+        return ErrorStatuses.NOT_FOUND;
       }
       const deserializedUser: JwtData = JSON.parse(user);
-      await this.redis.del(`user-${client.id}`);
-      client.broadcast.emit('userLogout', deserializedUser.user.id);
-      this.logger.log(`Disconnected: ${client.id}`);
+      await this.redis.del(`user-${clientId}`);
+
+      this.logger.log(`Disconnected: ${clientId}`);
+      return deserializedUser.user;
     } catch (e) {
       this.logger.error(`handleDisconnect: ${e.message}`);
+      return ErrorStatuses.SERVER_ERROR;
     }
   }
 
-  async findAllOnline(client: Socket) {
+  async findAllOnline(allCurrentConnections: CurrentConnectionList) {
     const users = await this.usersRepository.find();
     const onlineId: number[] = [];
-    const allCurrentConnections = getCurrentConnectionsFromClient(client);
+
     for (const connection of allCurrentConnections) {
       const redisData = await this.redis.get(`user-${connection.name}`);
       if (!redisData) {

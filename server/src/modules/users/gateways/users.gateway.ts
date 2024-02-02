@@ -14,6 +14,7 @@ import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {Socket} from 'socket.io';
 import {ErrorMessages} from '../../shared/enums/error.enum';
+import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 
 @BaseWebSocketGateway()
 @UseGuards(WsJwtGuard)
@@ -28,7 +29,7 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket) {
     const token = client.handshake.headers.authorization;
-    const userOrError = await this.usersService.handleConnection(token, client.id);
+    const userOrError = await this.usersService.handleUserConnection(token, client.id);
     if (typeof userOrError === 'number') {
       client.emit('error', {status: userOrError, message: ErrorMessages[userOrError]});
       client.disconnect(true);
@@ -41,11 +42,16 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: Socket) {
-    await this.usersService.handleDisconnect(client);
+    const userOrError = await this.usersService.handleUserDisconnect(client.id);
+    if (typeof userOrError === 'number') {
+      return;
+    }
+    client.broadcast.emit('userLogout', userOrError.id);
   }
 
   @SubscribeMessage('findAllOnlineUsers')
   findAll(@ConnectedSocket() client: Socket) {
-    return this.usersService.findAllOnline(client);
+    const allCurrentConnections = getCurrentConnectionsFromClient(client);
+    return this.usersService.findAllOnline(allCurrentConnections);
   }
 }
