@@ -80,11 +80,7 @@ export default function useWebSocketChat() {
           notificationService.error('Auth error');
           return;
         }
-        if (data.status === 403) {
-          notificationService.error('Permission error');
-          return;
-        }
-        if (data.status >= 500) {
+        if (data.status >= 500 && data.status < 600) {
           notificationService.error('Server error');
           return;
         }
