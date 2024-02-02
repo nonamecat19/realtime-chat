@@ -6,16 +6,8 @@ import {userDataAtom} from '@/store/users.ts';
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover.tsx';
 import {Button} from '@/components/ui/button.tsx';
 import {socketService} from '@/services/SocketService.ts';
-
-const STATUS_TYPE = {
-  BAN: 'BAN',
-  MUTE: 'MUTE',
-} as const;
-
-const MESSAGE_BY_STATUS = {
-  [STATUS_TYPE.BAN]: 'setBanStatus',
-  [STATUS_TYPE.MUTE]: 'setMuteStatus',
-} as const;
+import {MESSAGE_BY_STATUS, STATUS_TYPE} from '@/enums/statuses.enum.ts';
+import {ROLES} from '@/enums/roles.enum.ts';
 
 interface Props extends MappedUser {}
 
@@ -28,9 +20,9 @@ export function UsersListElement({
   id,
 }: Props) {
   const userData = useAtomValue(userDataAtom);
-  const isAdmin = userData?.role === 'ADMIN';
+  const isAdmin = userData?.role === ROLES.ADMIN;
 
-  function setStatus(type: keyof typeof STATUS_TYPE, status: boolean) {
+  function setStatus(type: keyof typeof MESSAGE_BY_STATUS, status: boolean) {
     socketService.socket?.emit(MESSAGE_BY_STATUS[type], {status, userId: id});
   }
 

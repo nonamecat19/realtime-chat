@@ -11,6 +11,7 @@ import {MappedChatMessage} from '@/types/chat.types.ts';
 import {storageService} from '@/services/StorageService.ts';
 import {notificationService} from '@/services/NotificationService.ts';
 import {socketService} from '@/services/SocketService.ts';
+import {ROLES} from '@/enums/roles.enum.ts';
 
 export default function useWebSocketChat() {
   const [userData, setUserData] = useAtom(userDataAtom);
@@ -139,7 +140,7 @@ export default function useWebSocketChat() {
       name: 'userLogout',
       handler: (userId: number) => {
         setOnline(online.filter(el => el !== userId));
-        if (userData?.role === 'ADMIN') {
+        if (userData?.role === ROLES.ADMIN) {
           return;
         }
         setUsers(users.filter(user => user.id !== userId));

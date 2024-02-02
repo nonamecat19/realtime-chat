@@ -5,6 +5,7 @@ import {Badge} from '@/components/ui/badge.tsx';
 import {cn} from '@/lib/utils.ts';
 import {HoverCard, HoverCardContent, HoverCardTrigger} from './ui/hover-card';
 import {CalendarDays} from 'lucide-react';
+import {ROLES} from '@/enums/roles.enum.ts';
 
 interface Props extends MappedChatMessage {}
 export default function MessageBlock({message, user, createdAt}: Props) {
@@ -51,7 +52,7 @@ export default function MessageBlock({message, user, createdAt}: Props) {
             >
               {user.nickname}
             </span>
-            {user.role === 'ADMIN' ? <Badge variant="outline">Admin</Badge> : null}
+            {user.role === ROLES.ADMIN ? <Badge variant="outline">Admin</Badge> : null}
             {user.isMuted ? <Badge variant="destructive">Muted</Badge> : null}
             {user.isBanned ? <Badge variant="destructive">Banned</Badge> : null}
           </div>
