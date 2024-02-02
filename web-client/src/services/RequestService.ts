@@ -11,10 +11,19 @@ export class RequestService {
   });
   constructor() {
     this.request.interceptors.request.use(
-      config => {
+      async config => {
+        const csrfTokenRequest = await axios.post(
+          '/auth/generateCsrf',
+          {},
+          {
+            baseURL: ConfigService.apiUrl,
+            withCredentials: true,
+          }
+        );
         const accessToken = new CookieService().getToken();
         if (accessToken) {
           config.headers['Authorization'] = `Bearer ${accessToken}`;
+          config.headers['x-csrf-token'] = csrfTokenRequest.data.token;
         }
         return config;
       },
