@@ -1,18 +1,35 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {ValidationPipe} from '@nestjs/common';
+import {FastifyAdapter, NestFastifyApplication} from '@nestjs/platform-fastify';
+import fastifyHelmet from '@fastify/helmet';
+import fastifyCsrfProtection from '@fastify/csrf-protection';
+import cookie from '@fastify/cookie';
+import {randomBytes} from 'crypto';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
   app.enableCors({
     credentials: true,
     origin: 'http://localhost:5173',
-    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-csrf-token',
     optionsSuccessStatus: 200,
     methods: '*',
     maxAge: 1000 * 60 * 60 * 24 * 14,
   });
   app.useGlobalPipes(new ValidationPipe());
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
+  await app.register(cookie, {
+    secret: randomBytes(32).toString('base64'),
+  });
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
+  await app.register(fastifyHelmet);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
+  await app.register(fastifyCsrfProtection);
+  //TODO port
   await app.listen(3000);
 }
 

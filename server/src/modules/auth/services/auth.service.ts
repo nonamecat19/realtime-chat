@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable, Logger, UnauthorizedException} from '@nestjs/common';
+import {Injectable, Logger, UnauthorizedException} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {ConfigService} from '@nestjs/config';
 import {LoginDto} from '../dto/login.dto';
@@ -9,22 +9,28 @@ import * as bcrypt from 'bcrypt';
 import {TokensResponseDto} from '../dto/tokens.response.dto';
 import {JwtData, TokenData} from '../../shared/types/jwt.types';
 import {verify} from 'jsonwebtoken';
+import {InjectRedis} from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
   private readonly JWT_SECRET: string;
   private readonly JWT_ACCESS_EXPIRE: string;
   private readonly JWT_REFRESH_EXPIRE: string;
+  private readonly crlfTokenTtl: string;
   private readonly logger: Logger = new Logger(AuthService.name);
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>
+    private readonly usersRepository: Repository<User>,
+    @InjectRedis()
+    private readonly redis: Redis
   ) {
     this.JWT_SECRET = configService.getOrThrow('jwt.jwtSecret');
     this.JWT_ACCESS_EXPIRE = configService.getOrThrow('jwt.jwtAccessExpire');
     this.JWT_REFRESH_EXPIRE = configService.getOrThrow('jwt.jwtRefreshExpire');
+    this.crlfTokenTtl = configService.getOrThrow('redis.crlfTokenTtl');
   }
 
   public async generateAccessJwtToken(user: any) {
@@ -103,5 +109,9 @@ export class AuthService {
       throw new UnauthorizedException('User is banned');
     }
     return data;
+  }
+
+  public async setCsrfToken(token: string) {
+    await this.redis.set(`csrf-${token}`, 'csrf', 'EX', this.crlfTokenTtl);
   }
 }
