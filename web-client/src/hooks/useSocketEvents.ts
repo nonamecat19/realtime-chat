@@ -3,6 +3,7 @@ import {socketService} from '@/services/SocketService.ts';
 
 export interface SocketEvent {
   name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: (data: any) => void;
 }
 

@@ -56,14 +56,6 @@ export default function useWebSocketChat() {
     setUsers(newUsers);
   }
 
-  // function reconnect() {
-  //   SocketService.reconnect();
-  //   SocketService.socket?.emit('getMessages', {}, (data: []) => {
-  //     console.log({data});
-  //     setMessages(data);
-  //   });
-  // }
-
   const events: SocketEvent[] = [
     {
       name: 'online',
@@ -103,16 +95,6 @@ export default function useWebSocketChat() {
       name: 'disconnect',
       handler: () => {
         navigate('/login');
-        // if (!new StorageService().getToken()) {
-        //   return;
-        // }
-        // NotificationService.error('Disconnected', {
-        //   duration: 50000,
-        //   action: {
-        //     label: 'Reconnect',
-        //     onClick: reconnect,
-        //   },
-        // });
       },
     },
     {
