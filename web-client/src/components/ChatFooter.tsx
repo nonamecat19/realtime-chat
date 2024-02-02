@@ -25,6 +25,9 @@ export default function ChatFooter() {
       <ProfileOptions />
       <Input
         onKeyDown={event => {
+          if (userMessage.length === 0 || onTimeout) {
+            return;
+          }
           if (event.key === 'Enter') {
             sendMessageHandle();
           }
