@@ -8,6 +8,7 @@ import {AdminService} from '../services/admin.service';
 import {SetStatusDto} from '../dto/set-status.dto';
 import {Socket} from 'socket.io';
 import {AdminWsGuard} from '../../shared/guards/admin-ws.guard';
+import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 
 @BaseWebSocketGateway()
 @UseGuards(WsJwtGuard, AdminWsGuard)
@@ -21,7 +22,8 @@ export class AdminGateway {
 
   @SubscribeMessage('setBanStatus')
   async setBanStatus(@MessageBody() setStatusDto: SetStatusDto, @ConnectedSocket() client: Socket) {
-    await this.adminService.setBanStatus(setStatusDto, client);
+    const currentConnectionList = getCurrentConnectionsFromClient(client);
+    await this.adminService.setBanStatus(setStatusDto, currentConnectionList);
     this.server.emit('updateUser', {
       userId: setStatusDto.userId,
       update: {

@@ -1,4 +1,4 @@
-import {Socket} from 'socket.io';
+import {Server, Socket} from 'socket.io';
 import {UnauthorizedException} from '@nestjs/common';
 import {RoleEnum} from '../../../../db/entities/user.entity';
 import {CurrentConnectionList} from '../types/socket.types';
@@ -20,4 +20,8 @@ export function getUserFromClient(client: Socket): User {
 export function getCurrentConnectionsFromClient(client: Socket): CurrentConnectionList {
   const socketsMap = client.nsp.sockets;
   return Array.from(socketsMap, ([name, value]) => ({name, value}));
+}
+
+export function getConnectedClientsFromServer(server: Server) {
+  return [...server.sockets.sockets.keys()];
 }

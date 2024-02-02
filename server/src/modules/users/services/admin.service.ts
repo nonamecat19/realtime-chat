@@ -5,9 +5,8 @@ import {Repository} from 'typeorm';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import {SetStatusDto} from '../dto/set-status.dto';
-import {Socket} from 'socket.io';
-import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
 import {JwtData} from '../../shared/types/jwt.types';
+import {CurrentConnectionList} from '../../shared/types/socket.types';
 
 @Injectable()
 export class AdminService {
@@ -19,7 +18,10 @@ export class AdminService {
     private readonly redis: Redis
   ) {}
 
-  public async setBanStatus(setStatusDto: SetStatusDto, client: Socket) {
+  public async setBanStatus(
+    setStatusDto: SetStatusDto,
+    currentConnectionList: CurrentConnectionList
+  ) {
     await this.usersRepository.update(
       {
         id: setStatusDto.userId,
@@ -28,8 +30,7 @@ export class AdminService {
         isBanned: setStatusDto.status,
       }
     );
-    const socketArray = getCurrentConnectionsFromClient(client);
-    for (const {name, value: socket} of socketArray) {
+    for (const {name, value: socket} of currentConnectionList) {
       const userInRedis = await this.redis.get(`user-${name}`);
       if (!userInRedis) {
         continue;

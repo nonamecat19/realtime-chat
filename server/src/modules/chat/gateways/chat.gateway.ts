@@ -5,11 +5,12 @@ import {ChatServer} from '../types/chatEvents.types';
 import {Logger, UseFilters, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
 import {WsJwtGuard} from '../../shared/guards/ws-jwt.guard';
 import {SocketAuthMiddleware} from '../../shared/middlewares/ws.middleware';
-import {getUserFromClient} from '../../shared/utils/socket.utils';
+import {getConnectedClientsFromServer, getUserFromClient} from '../../shared/utils/socket.utils';
 import {SendMessageDto} from '../dto/send-message.dto';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
 import {Cron, CronExpression} from '@nestjs/schedule';
+import {ErrorMessages} from '../../shared/enums/error.enum';
 
 @BaseWebSocketGateway()
 @UseGuards(WsJwtGuard)
@@ -42,18 +43,26 @@ export class ChatGateway {
     if (trimmed.length < 1) {
       return client.emit('error', {status: 400, message: 'Message must not be empty'});
     }
-    await this.chatService.sendMessage(user.id, trimmed, client);
+    const messageOrError = await this.chatService.sendMessage(user.id, trimmed, client.id);
+    if (typeof messageOrError === 'number') {
+      client.emit('error', {status: messageOrError, message: ErrorMessages[messageOrError]});
+      return;
+    }
+    client.broadcast.emit('receiveMessage', messageOrError);
+    client.emit('receiveMessage', messageOrError);
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async handleCron() {
-    const usersId = await this.chatService.getOlineUsersId(this.server);
+    const connectedClients = getConnectedClientsFromServer(this.server);
+    const usersId = await this.chatService.getOlineUsersId(connectedClients);
     this.server.emit('online', usersId);
     this.logger.log('Users notified');
   }
 
   @SubscribeMessage('getOlineUsersId')
   async getOlineUsersId() {
-    return this.chatService.getOlineUsersId(this.server);
+    const connectedClients = getConnectedClientsFromServer(this.server);
+    return this.chatService.getOlineUsersId(connectedClients);
   }
 }
