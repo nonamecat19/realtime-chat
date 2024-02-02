@@ -6,6 +6,7 @@ import Redis from 'ioredis';
 import {getAllRedisData} from '../utils/redis.utils';
 import {AuthService} from '../../auth/services/auth.service';
 import {getCurrentConnectionsFromClient} from '../utils/socket.utils';
+import {ErrorMessages} from '../enums/error.enum';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -25,15 +26,23 @@ export class WsJwtGuard implements CanActivate {
     try {
       const {authorization} = client.handshake.headers;
 
-      const dataFromToken = await this.authService.verifyBearerToken(authorization);
-      client.data.user = dataFromToken;
+      const dataFromTokenOrError = await this.authService.verifyBearerToken(authorization);
+      if (typeof dataFromTokenOrError === 'number') {
+        client.emit('error', {
+          status: dataFromTokenOrError,
+          message: ErrorMessages[dataFromTokenOrError],
+        });
+        return;
+      }
+
+      client.data.user = dataFromTokenOrError;
       const cacheData = {
-        ...dataFromToken,
+        ...dataFromTokenOrError,
         timestamp: new Date(),
       };
-      await this.handleRedis(dataFromToken, client, cacheData);
+      await this.handleRedis(dataFromTokenOrError, client, cacheData);
     } catch (e) {
-      client.emit('error', {status: 401, message: 'User is banned'});
+      client.emit('error', {status: 400, message: e.message});
       throw e;
     }
 

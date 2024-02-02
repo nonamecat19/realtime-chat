@@ -1,4 +1,14 @@
-import {Body, Controller, ForbiddenException, HttpCode, Post, Res, UseGuards} from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  ForbiddenException,
+  HttpCode,
+  Post,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {UsersService} from '../../users/services/users.service';
 import {AuthService} from '../services/auth.service';
 import {LoginDto} from '../dto/login.dto';
@@ -6,6 +16,7 @@ import {JwtService} from '@nestjs/jwt';
 import {ConfigService} from '@nestjs/config';
 import {FastifyReply} from 'fastify';
 import {CsrfGuard} from '../../shared/guards/csrf.guard';
+import {ErrorMessages, ErrorStatuses} from '../../shared/enums/error.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -23,14 +34,22 @@ export class AuthController {
   @HttpCode(200)
   @Post('/login')
   public async login(@Body() loginDto: LoginDto, @Res() reply: FastifyReply) {
-    let user = await this.authService.getUserByCredentials(loginDto);
-    if (!user) {
-      user = await this.usersService.create(loginDto.login, loginDto.password);
+    let userOrError = await this.authService.getUserOrErrorByCredentials(loginDto);
+    if (typeof userOrError === 'number') {
+      if (userOrError === ErrorStatuses.NOT_FOUND) {
+        userOrError = await this.usersService.create(loginDto.login, loginDto.password);
+      } else if (userOrError === ErrorStatuses.AUTH_ERROR) {
+        throw new UnauthorizedException(ErrorMessages[ErrorStatuses.AUTH_ERROR]);
+      } else {
+        throw new BadRequestException(ErrorMessages[userOrError]);
+      }
+    } else {
+      if (userOrError.isBanned) {
+        throw new ForbiddenException(ErrorMessages[ErrorStatuses.YOU_BANNED]);
+      }
     }
-    if (user.isBanned) {
-      throw new ForbiddenException(['You banned']);
-    }
-    const {tokensDto} = await this.authService.getTokensByUser(user);
+
+    const {tokensDto} = await this.authService.getTokensByUser(userOrError);
     reply.send(tokensDto);
   }
 

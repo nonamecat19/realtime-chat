@@ -10,6 +10,7 @@ import {Socket} from 'socket.io';
 import {JwtData} from '../../shared/types/jwt.types';
 import {AuthService} from '../../auth/services/auth.service';
 import {getCurrentConnectionsFromClient} from '../../shared/utils/socket.utils';
+import {ErrorStatuses} from '../../shared/enums/error.enum';
 
 @Injectable()
 export class UsersService {
@@ -37,25 +38,23 @@ export class UsersService {
     return this.usersRepository.findOne({where: {id: userId}});
   }
 
-  async handleConnection(client: Socket) {
+  async handleConnection(token: string, clientId: string): Promise<User | ErrorStatuses> {
     try {
-      const token = client.handshake.headers.authorization;
-      const tokenData = await this.authService.verifyBearerToken(token);
+      const tokenDataOrError = await this.authService.verifyBearerToken(token);
 
-      const user = await this.findOneById(tokenData.user.id);
+      if (typeof tokenDataOrError === 'number') {
+        return tokenDataOrError;
+      }
+
+      const user = await this.findOneById(tokenDataOrError.user.id);
       const cacheData = {
-        ...tokenData,
+        ...tokenDataOrError,
         timestamp: new Date(),
       };
-      this.redis.set(`user-${client.id}`, JSON.stringify(cacheData));
-      setTimeout(() => {
-        client.broadcast.emit('userLogin', user);
-        this.logger.log(`Connected: ${client.id}`);
-      }, 500);
+      this.redis.set(`user-${clientId}`, JSON.stringify(cacheData));
+      return user;
     } catch (e) {
-      client.emit('error', {status: 401, message: e.message});
-      client.disconnect(true);
-      this.logger.error(`handleConnection: ${e.message}`);
+      return ErrorStatuses.SERVER_ERROR;
     }
   }
 

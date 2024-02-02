@@ -1,4 +1,4 @@
-import {Injectable, Logger, UnauthorizedException} from '@nestjs/common';
+import {Injectable, Logger} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {ConfigService} from '@nestjs/config';
 import {LoginDto} from '../dto/login.dto';
@@ -11,6 +11,7 @@ import {JwtData, TokenData} from '../../shared/types/jwt.types';
 import {verify} from 'jsonwebtoken';
 import {InjectRedis} from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import {ErrorStatuses} from '../../shared/enums/error.enum';
 
 @Injectable()
 export class AuthService {
@@ -49,7 +50,7 @@ export class AuthService {
     });
   }
 
-  public async getUserByCredentials(loginDto: LoginDto) {
+  public async getUserOrErrorByCredentials(loginDto: LoginDto): Promise<User | ErrorStatuses> {
     const user = await this.usersRepository.findOne({
       where: {
         nickname: loginDto.login,
@@ -64,12 +65,12 @@ export class AuthService {
       },
     });
     if (!user) {
-      return null;
+      return ErrorStatuses.NOT_FOUND;
     }
 
     const result = await bcrypt.compare(loginDto.password, user.password);
     if (!result) {
-      throw new UnauthorizedException();
+      return ErrorStatuses.AUTH_ERROR;
     }
 
     return user;
@@ -92,21 +93,21 @@ export class AuthService {
     return {tokensDto, refreshToken};
   }
 
-  public async verifyBearerToken(token: string): Promise<JwtData> {
+  public async verifyBearerToken(token: string): Promise<JwtData | ErrorStatuses> {
     const noBearer = token.split(' ')[1];
     const data = verify(noBearer, this.jwtSecret) as JwtData;
     if (typeof data === 'string') {
       this.logger.error('Wrong format for token: ', data);
-      throw new UnauthorizedException('Wrong format for token');
+      return ErrorStatuses.AUTH_ERROR;
     }
     const user = await this.usersRepository.findOne({where: {id: data.user.id}});
     if (!user) {
       this.logger.error('User not found');
-      throw new UnauthorizedException('User not found');
+      return ErrorStatuses.NOT_FOUND;
     }
     if (user.isBanned) {
       this.logger.error('User is banned');
-      throw new UnauthorizedException('User is banned');
+      return ErrorStatuses.YOU_BANNED;
     }
     return data;
   }
