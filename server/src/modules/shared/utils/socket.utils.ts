@@ -2,13 +2,13 @@ import {Socket} from 'socket.io';
 import {UnauthorizedException} from '@nestjs/common';
 import {RoleEnum} from '../../../../db/entities/user.entity';
 
-interface IUser {
+interface User {
   id: number;
   role: keyof typeof RoleEnum;
   nickname: string;
 }
 
-export function getUserFromClient(client: Socket): IUser {
+export function getUserFromClient(client: Socket): User {
   const user = client.data.user.user;
   if (!user) {
     throw new UnauthorizedException();

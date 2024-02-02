@@ -14,9 +14,9 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
-  private readonly JWT_SECRET: string;
-  private readonly JWT_ACCESS_EXPIRE: string;
-  private readonly JWT_REFRESH_EXPIRE: string;
+  private readonly jwtSecret: string;
+  private readonly jwtAccessExpire: string;
+  private readonly jwtRefreshExpire: string;
   private readonly crlfTokenTtl: string;
   private readonly logger: Logger = new Logger(AuthService.name);
   constructor(
@@ -27,25 +27,25 @@ export class AuthService {
     @InjectRedis()
     private readonly redis: Redis
   ) {
-    this.JWT_SECRET = configService.getOrThrow('jwt.jwtSecret');
-    this.JWT_ACCESS_EXPIRE = configService.getOrThrow('jwt.jwtAccessExpire');
-    this.JWT_REFRESH_EXPIRE = configService.getOrThrow('jwt.jwtRefreshExpire');
+    this.jwtSecret = configService.getOrThrow('jwt.jwtSecret');
+    this.jwtAccessExpire = configService.getOrThrow('jwt.jwtAccessExpire');
+    this.jwtRefreshExpire = configService.getOrThrow('jwt.jwtRefreshExpire');
     this.crlfTokenTtl = configService.getOrThrow('redis.crlfTokenTtl');
   }
 
   public async generateAccessJwtToken(user: any) {
     const payload = {user};
     return this.jwtService.sign(payload, {
-      secret: this.JWT_SECRET,
-      expiresIn: this.JWT_ACCESS_EXPIRE,
+      secret: this.jwtSecret,
+      expiresIn: this.jwtAccessExpire,
     });
   }
 
   public async generateRefreshJwtToken(user: any) {
     const payload = {user};
     return this.jwtService.sign(payload, {
-      secret: this.JWT_SECRET,
-      expiresIn: this.JWT_REFRESH_EXPIRE,
+      secret: this.jwtSecret,
+      expiresIn: this.jwtRefreshExpire,
     });
   }
 
@@ -94,7 +94,7 @@ export class AuthService {
 
   public async verifyBearerToken(token: string): Promise<JwtData> {
     const noBearer = token.split(' ')[1];
-    const data = verify(noBearer, this.JWT_SECRET) as JwtData;
+    const data = verify(noBearer, this.jwtSecret) as JwtData;
     if (typeof data === 'string') {
       this.logger.error('Wrong format for token: ', data);
       throw new UnauthorizedException('Wrong format for token');

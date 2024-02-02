@@ -9,14 +9,14 @@ import {CsrfGuard} from '../../shared/guards/csrf.guard';
 
 @Controller('auth')
 export class AuthController {
-  REFRESH_TOKEN: string;
+  refreshToken: string;
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {
-    this.REFRESH_TOKEN = this.configService.get<string>('cookie.refreshToken');
+    this.refreshToken = this.configService.get<string>('cookie.refreshToken');
   }
 
   @UseGuards(CsrfGuard)

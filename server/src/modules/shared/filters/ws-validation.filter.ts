@@ -2,7 +2,7 @@ import {ArgumentsHost, Catch, HttpException} from '@nestjs/common';
 import {WsException} from '@nestjs/websockets';
 import {Socket} from 'socket.io';
 
-interface IResponse {
+interface Response {
   message: string[];
   error: string;
   statusCode: number;
@@ -21,7 +21,7 @@ export class WsExceptionFilter {
       return;
     }
     const status = exception.getStatus();
-    const message = (exception.getResponse() as IResponse)?.message || 'Internal Server Error';
+    const message = (exception.getResponse() as Response)?.message || 'Internal Server Error';
     client.emit('error', {status, message});
   }
 }

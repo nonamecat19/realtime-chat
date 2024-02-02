@@ -13,7 +13,7 @@ import {ConfigService} from '@nestjs/config';
 @Injectable()
 export class ChatService {
   logger = new Logger(ChatService.name);
-  private readonly MINIMUM_TIME_BETWEEN_MESSAGES: number;
+  private readonly minimumTimeBetweenMessages: number;
   constructor(
     @InjectRepository(ChatMessage)
     private readonly chatMessageRepository: Repository<ChatMessage>,
@@ -22,8 +22,8 @@ export class ChatService {
     private readonly redis: Redis,
     private readonly configService: ConfigService
   ) {
-    this.MINIMUM_TIME_BETWEEN_MESSAGES = configService.getOrThrow<number>(
-      'chat.minimumTimeBetweenMessage'
+    this.minimumTimeBetweenMessages = configService.getOrThrow<number>(
+      'chat.minimumTimeBetweenMessages'
     );
   }
   async getLastMessages() {
@@ -46,7 +46,7 @@ export class ChatService {
       const lastMessageDate = new Date(lastMessageTime);
       const currentDate = new Date();
       const differenceInMs = currentDate.getTime() - lastMessageDate.getTime();
-      if (differenceInMs < this.MINIMUM_TIME_BETWEEN_MESSAGES) {
+      if (differenceInMs < this.minimumTimeBetweenMessages) {
         return client.emit('error', {status: 429, message: 'Too many requests'});
       }
     }
