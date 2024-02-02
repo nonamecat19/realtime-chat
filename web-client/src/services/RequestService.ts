@@ -37,8 +37,9 @@ class RequestService {
           notificationService.error('Wrong password');
         } else {
           const messages = error.response?.data?.message ?? [];
-
-          if (!messages || messages.length === 0) {
+          if (!Array.isArray(messages)) {
+            notificationService.error(messages);
+          } else if (!messages || messages.length === 0) {
             notificationService.error(error.message);
           } else {
             for (const message of messages) {
