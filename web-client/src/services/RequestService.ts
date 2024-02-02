@@ -23,8 +23,8 @@ class RequestService {
         const accessToken = storageService.getToken();
         if (accessToken) {
           config.headers['Authorization'] = `Bearer ${accessToken}`;
-          config.headers['x-csrf-token'] = csrfTokenRequest.data.token;
         }
+        config.headers['x-csrf-token'] = csrfTokenRequest.data.token;
         return config;
       },
       error => Promise.reject(error)
