@@ -6,14 +6,14 @@ import {userDataAtom} from '@/store/users.ts';
 import {Badge} from '@/components/ui/badge.tsx';
 import {Separator} from '@/components/ui/separator.tsx';
 import {useNavigate} from 'react-router-dom';
-import {CookieService} from '@/services/CookieService.ts';
+import {storageService} from '@/services/StorageService.ts';
 
 export default function ProfileOptions() {
   const userData = useAtomValue(userDataAtom);
   const navigate = useNavigate();
 
   function logout() {
-    new CookieService().deleteToken();
+    storageService.deleteToken();
     navigate('/login');
   }
 

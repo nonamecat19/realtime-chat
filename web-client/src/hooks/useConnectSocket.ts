@@ -1,11 +1,11 @@
 import {useEffect} from 'react';
-import {SocketService} from '@/services/SocketService.ts';
+import {socketService} from '@/services/SocketService.ts';
 
 export function useConnectSocket() {
   useEffect(() => {
-    SocketService.createConnection();
+    socketService.createConnection();
     return () => {
-      SocketService.closeConnection();
+      socketService.closeConnection();
     };
   }, []);
 }

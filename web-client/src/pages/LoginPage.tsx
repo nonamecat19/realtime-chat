@@ -3,14 +3,14 @@ import {Button} from '@/components/ui/button.tsx';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
-import {CookieService} from '@/services/CookieService.ts';
 import {useNavigate} from 'react-router-dom';
 import {LoginFormInfer, LoginFormSchema} from '@/schemas/loginForm.ts';
-import {NotificationService} from '@/services/NotificationService.ts';
 import {useSetAtom} from 'jotai';
 import {userDataAtom} from '@/store/users.ts';
 import {LoginResponse} from '@/types/user.types.ts';
-import {RequestService} from '@/services/RequestService.ts';
+import {storageService} from '@/services/StorageService.ts';
+import {notificationService} from '@/services/NotificationService.ts';
+import {requestService} from '@/services/RequestService.ts';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -26,18 +26,18 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormInfer) {
     try {
-      const res = await new RequestService().request.post<LoginResponse>('/auth/login', data);
+      const res = await requestService.request.post<LoginResponse>('/auth/login', data);
       if (!res) {
         return;
       }
       const token = res?.data?.token;
       setUserData(res?.data.user);
-      new CookieService().setToken(token);
+      storageService.setToken(token);
       navigate('/');
-      NotificationService.success('Login successful');
+      notificationService.success('Login successful');
     } catch (e: unknown) {
       if (e instanceof Error) {
-        NotificationService.error(e.message);
+        notificationService.error(e.message);
       }
     }
   }

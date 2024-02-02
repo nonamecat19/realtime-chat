@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import {SocketService} from '@/services/SocketService.ts';
+import {socketService} from '@/services/SocketService.ts';
 
 export interface SocketEvent {
   name: string;
@@ -9,12 +9,12 @@ export interface SocketEvent {
 export function useSocketEvents(events: SocketEvent[] = []) {
   useEffect(() => {
     for (const event of events) {
-      SocketService.socket?.on(event.name, event.handler);
+      socketService.socket?.on(event.name, event.handler);
     }
 
     return function () {
       for (const event of events) {
-        SocketService.socket?.off(event.name);
+        socketService.socket?.off(event.name);
       }
     };
   }, [events]);

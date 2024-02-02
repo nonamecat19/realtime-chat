@@ -4,7 +4,7 @@ import {useState} from 'react';
 import {Forward, Timer} from 'lucide-react';
 import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
 import ProfileOptions from '@/components/ProfileOptions.tsx';
-import {SocketService} from '@/services/SocketService.ts';
+import {socketService} from '@/services/SocketService.ts';
 
 export default function ChatFooter() {
   const [userMessage, setUserMessage] = useState<string>('');
@@ -12,7 +12,7 @@ export default function ChatFooter() {
   const [onTimeout, setOnTimeout] = useState<boolean>(false);
 
   function sendMessageHandle() {
-    SocketService.socket?.emit('sendMessage', {message: userMessage});
+    socketService.socket?.emit('sendMessage', {message: userMessage});
     setUserMessage('');
     setOnTimeout(true);
     setTimeout(() => {

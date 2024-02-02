@@ -1,19 +1,22 @@
 import {ExternalToast, toast} from 'sonner';
 
-export class NotificationService {
-  public static error(message: string, options: ExternalToast = {}) {
+class NotificationService {
+  public error(message: string, options: ExternalToast = {}) {
     toast.error(message, options);
   }
 
-  public static warn(message: string, options: ExternalToast = {}) {
+  public warn(message: string, options: ExternalToast = {}) {
     toast.warning(message, options);
   }
 
-  public static success(message: string, options: ExternalToast = {}) {
+  public success(message: string, options: ExternalToast = {}) {
     toast.success(message, options);
   }
 
-  public static info(message: string, options: ExternalToast = {}) {
+  public info(message: string, options: ExternalToast = {}) {
     toast.info(message, options);
   }
 }
+const notificationService = new NotificationService();
+Object.freeze(notificationService);
+export {notificationService};

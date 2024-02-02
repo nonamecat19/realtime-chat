@@ -4,13 +4,13 @@ import {useNavigate} from 'react-router-dom';
 import {messagesAtom, onlineAtom} from '@/store/chat.ts';
 import {UpdateUserEvent, User} from '@/types/user.types.ts';
 import {Entries} from '@/types/utils.types.ts';
-import {NotificationService} from '@/services/NotificationService.ts';
 import {SocketEvent, useSocketEvents} from '@/hooks/useSocketEvents.ts';
 import {ErrorMessage} from '@/types/global.types.ts';
 import {useEffect} from 'react';
 import {MappedChatMessage} from '@/types/chat.types.ts';
-import {CookieService} from '@/services/CookieService.ts';
-import {SocketService} from '@/services/SocketService.ts';
+import {storageService} from '@/services/StorageService.ts';
+import {notificationService} from '@/services/NotificationService.ts';
+import {socketService} from '@/services/SocketService.ts';
 
 export default function useWebSocketChat() {
   const [userData, setUserData] = useAtom(userDataAtom);
@@ -74,26 +74,26 @@ export default function useWebSocketChat() {
       name: 'error',
       handler: (data: ErrorMessage) => {
         if (data.status === 401) {
-          new CookieService().deleteToken();
+          storageService.deleteToken();
           navigate('/login');
-          NotificationService.error('Auth error');
+          notificationService.error('Auth error');
           return;
         }
         if (data.status === 403) {
-          NotificationService.error('Permission error');
+          notificationService.error('Permission error');
           return;
         }
         if (data.status >= 500) {
-          NotificationService.error('Server error');
+          notificationService.error('Server error');
           return;
         }
-        NotificationService.error(data.message);
+        notificationService.error(data.message);
       },
     },
     {
       name: 'success',
       handler: () => {
-        NotificationService.success('Success');
+        notificationService.success('Success');
       },
     },
     {
@@ -106,7 +106,7 @@ export default function useWebSocketChat() {
       name: 'disconnect',
       handler: () => {
         navigate('/login');
-        // if (!new CookieService().getToken()) {
+        // if (!new StorageService().getToken()) {
         //   return;
         // }
         // NotificationService.error('Disconnected', {
@@ -154,15 +154,15 @@ export default function useWebSocketChat() {
       navigate('/login');
     }
     if (userData?.role === 'ADMIN') {
-      SocketService.socket?.emit('findAllUsers', {}, (users: User[]) => {
+      socketService.socket?.emit('findAllUsers', {}, (users: User[]) => {
         setUsers(users);
       });
-      SocketService.socket?.emit('getOlineUsersId', {}, (usersId: number[]) => {
+      socketService.socket?.emit('getOlineUsersId', {}, (usersId: number[]) => {
         const newOnline = new Set([...usersId, userData!.id]);
         setOnline([...newOnline]);
       });
     } else {
-      SocketService.socket?.emit('findAllOnlineUsers', {}, (data: User[]) => {
+      socketService.socket?.emit('findAllOnlineUsers', {}, (data: User[]) => {
         setUsers(data);
         const usersId = data.map(user => {
           return user.id;
@@ -174,7 +174,7 @@ export default function useWebSocketChat() {
     if (userData && !online.includes(userData?.id ?? -1)) {
       setOnline([...online, userData!.id]);
     }
-    SocketService.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
+    socketService.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
       setMessages(data);
     });
   }, []);

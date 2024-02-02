@@ -1,12 +1,12 @@
 import axios, {AxiosError} from 'axios';
-import {CookieService} from '@/services/CookieService.ts';
-import {ConfigService} from '@/services/ConfigService.ts';
-import {NotificationService} from '@/services/NotificationService.ts';
 import {AxiosErrorWithMessages} from '@/types/request.types.ts';
+import {configService} from '@/services/ConfigService.ts';
+import {storageService} from '@/services/StorageService.ts';
+import {notificationService} from '@/services/NotificationService.ts';
 
-export class RequestService {
+class RequestService {
   public readonly request = axios.create({
-    baseURL: ConfigService.apiUrl,
+    baseURL: configService.apiUrl,
     withCredentials: true,
   });
   constructor() {
@@ -16,11 +16,11 @@ export class RequestService {
           '/auth/generateCsrf',
           {},
           {
-            baseURL: ConfigService.apiUrl,
+            baseURL: configService.apiUrl,
             withCredentials: true,
           }
         );
-        const accessToken = new CookieService().getToken();
+        const accessToken = storageService.getToken();
         if (accessToken) {
           config.headers['Authorization'] = `Bearer ${accessToken}`;
           config.headers['x-csrf-token'] = csrfTokenRequest.data.token;
@@ -34,15 +34,15 @@ export class RequestService {
       response => response,
       (error: AxiosError<AxiosErrorWithMessages>) => {
         if (error.response?.status === 401) {
-          NotificationService.error('Wrong password');
+          notificationService.error('Wrong password');
         } else {
           const messages = error.response?.data?.message ?? [];
 
           if (!messages || messages.length === 0) {
-            NotificationService.error(error.message);
+            notificationService.error(error.message);
           } else {
             for (const message of messages) {
-              NotificationService.error(message);
+              notificationService.error(message);
             }
           }
         }
@@ -52,3 +52,6 @@ export class RequestService {
     );
   }
 }
+const requestService = new RequestService();
+Object.freeze(requestService);
+export {requestService};

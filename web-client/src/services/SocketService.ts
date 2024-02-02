@@ -1,44 +1,47 @@
 import {io, Socket} from 'socket.io-client';
-import {CookieService} from '@/services/CookieService.ts';
-import {ConfigService} from '@/services/ConfigService.ts';
-import {NotificationService} from '@/services/NotificationService.ts';
+import {configService} from '@/services/ConfigService.ts';
+import {notificationService} from '@/services/NotificationService.ts';
+import {storageService} from '@/services/StorageService.ts';
 
-export class SocketService {
-  static socket: null | Socket = null;
+class SocketService {
+  socket: null | Socket = null;
 
-  static createConnection() {
+  createConnection() {
     if (this.socket) {
       return;
     }
 
-    const token = new CookieService().getToken();
+    const token = storageService.getToken();
 
     if (!token) {
       console.error('No token');
       return;
     }
 
-    this.socket = io(ConfigService.apiUrl, {
+    this.socket = io(configService.apiUrl, {
       extraHeaders: {
         Authorization: `Bearer ${token}`,
       },
     });
 
     this.socket.on('connect_error', e => {
-      NotificationService.error('Connection error');
+      notificationService.error('Connection error');
       console.error({connectError: e});
     });
   }
 
-  static closeConnection() {
+  closeConnection() {
     this.socket?.close();
     if (this.socket) {
       this.socket = null;
     }
   }
 
-  static reconnect() {
+  reconnect() {
     this.closeConnection();
     this.createConnection();
   }
 }
+const socketService = new SocketService();
+Object.freeze(socketService);
+export {socketService};
