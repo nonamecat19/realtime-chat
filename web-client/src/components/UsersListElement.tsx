@@ -17,7 +17,7 @@ const MESSAGE_BY_STATUS = {
   [STATUS_TYPE.MUTE]: 'setMuteStatus',
 } as const;
 
-interface IProps extends MappedUser {}
+interface Props extends MappedUser {}
 
 export function UsersListElement({
   online,
@@ -26,7 +26,7 @@ export function UsersListElement({
   isMuted,
   isBanned,
   id,
-}: IProps) {
+}: Props) {
   const userData = useAtomValue(userDataAtom);
   const isAdmin = userData?.role === 'ADMIN';
 

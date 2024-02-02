@@ -6,8 +6,8 @@ import {cn} from '@/lib/utils.ts';
 import {HoverCard, HoverCardContent, HoverCardTrigger} from './ui/hover-card';
 import {CalendarDays} from 'lucide-react';
 
-interface IProps extends MappedChatMessage {}
-export default function MessageBlock({message, user, createdAt}: IProps) {
+interface Props extends MappedChatMessage {}
+export default function MessageBlock({message, user, createdAt}: Props) {
   return (
     <li className="p-2 bg-zinc-50 shadow-md border-2 border-zinc-200 rounded-lg flex gap-5">
       <HoverCard>
