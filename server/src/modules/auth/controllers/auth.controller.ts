@@ -41,7 +41,7 @@ export class AuthController {
       } else if (userOrError === ErrorStatuses.AUTH_ERROR) {
         throw new UnauthorizedException(ErrorMessages[ErrorStatuses.AUTH_ERROR]);
       } else {
-        throw new BadRequestException(ErrorMessages[userOrError]);
+        throw new BadRequestException(ErrorMessages[ErrorStatuses[userOrError]]);
       }
     } else {
       if (userOrError.isBanned) {

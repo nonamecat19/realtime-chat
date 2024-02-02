@@ -10,7 +10,7 @@ import {SendMessageDto} from '../dto/send-message.dto';
 import {WsExceptionFilter} from '../../shared/filters/ws-validation.filter';
 import {BaseWebSocketGateway} from '../../shared/decorators/base-ws-gateway.decorator';
 import {Cron, CronExpression} from '@nestjs/schedule';
-import {ErrorMessages} from '../../shared/enums/error.enum';
+import {ErrorMessages, ErrorStatuses} from '../../shared/enums/error.enum';
 
 @BaseWebSocketGateway()
 @UseGuards(WsJwtGuard)
@@ -45,7 +45,8 @@ export class ChatGateway {
     }
     const messageOrError = await this.chatService.sendMessage(user.id, trimmed, client.id);
     if (typeof messageOrError === 'number') {
-      client.emit('error', {status: messageOrError, message: ErrorMessages[messageOrError]});
+      const message = ErrorMessages[ErrorStatuses[messageOrError]];
+      client.emit('error', {status: messageOrError, message});
       return;
     }
     client.broadcast.emit('receiveMessage', messageOrError);

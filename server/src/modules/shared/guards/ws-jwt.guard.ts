@@ -6,7 +6,7 @@ import Redis from 'ioredis';
 import {getAllRedisData} from '../utils/redis.utils';
 import {AuthService} from '../../auth/services/auth.service';
 import {getCurrentConnectionsFromClient} from '../utils/socket.utils';
-import {ErrorMessages} from '../enums/error.enum';
+import {ErrorMessages, ErrorStatuses} from '../enums/error.enum';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -30,7 +30,7 @@ export class WsJwtGuard implements CanActivate {
       if (typeof dataFromTokenOrError === 'number') {
         client.emit('error', {
           status: dataFromTokenOrError,
-          message: ErrorMessages[dataFromTokenOrError],
+          message: ErrorMessages[ErrorStatuses[dataFromTokenOrError]],
         });
         return;
       }
