@@ -46,11 +46,9 @@ export class ChatGateway {
     const messageOrError = await this.chatService.sendMessage(user.id, trimmed, client.id);
     if (typeof messageOrError === 'number') {
       const message = ErrorMessages[ErrorStatuses[messageOrError]];
-      client.emit('error', {status: messageOrError, message});
-      return;
+      return client.emit('error', {status: messageOrError, message});
     }
-    client.broadcast.emit('receiveMessage', messageOrError);
-    client.emit('receiveMessage', messageOrError);
+    this.server.emit('receiveMessage', messageOrError);
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
