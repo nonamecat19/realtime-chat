@@ -10,20 +10,24 @@ import {JwtData, TokenData} from '../../shared/types/jwt.types';
 import {AuthService} from '../../auth/services/auth.service';
 import {ErrorStatuses} from '../../shared/enums/error.enum';
 import {CurrentConnectionList} from '../../shared/types/socket.types';
+import {ConfigService} from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
+  private readonly saltOrRounds: number;
   logger = new Logger(UsersService.name);
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @InjectRedis()
     private readonly redis: Redis,
-    private readonly authService: AuthService
-  ) {}
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
+  ) {
+    this.saltOrRounds = configService.getOrThrow<number>('jwt.saltOrRounds');
+  }
   public async create(login: string, password: string) {
-    const saltOrRounds = 10;
-    const cryptPassword = await bcrypt.hash(password, saltOrRounds);
+    const cryptPassword = await bcrypt.hash(password, this.saltOrRounds);
     const usersCount = await this.usersRepository.count();
     return this.usersRepository.save({
       nickname: login,
