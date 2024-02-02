@@ -3,15 +3,12 @@ import {useRef} from 'react';
 import {SocketEvent, useSocketEvents} from '@/hooks/useSocketEvents.ts';
 import {useAtomValue, useSetAtom} from 'jotai';
 import {mappedMessagesAtom, messagesAtom} from '@/store/chat.ts';
-import {useConnectSocket} from '@/hooks/useConnectSocket.ts';
 
 export function ChatBody() {
   const setMessages = useSetAtom(messagesAtom);
   const mappedMessages = useAtomValue(mappedMessagesAtom);
 
   const messagesContainerRef = useRef<HTMLUListElement>(null);
-
-  useConnectSocket();
 
   const events: SocketEvent[] = [
     {
