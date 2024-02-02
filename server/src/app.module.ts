@@ -10,9 +10,17 @@ import {ChatMessage} from '../db/entities/chatMessage.entity';
 import {ScheduleModule} from '@nestjs/schedule';
 import {RedisModule} from '@nestjs-modules/ioredis';
 import {AppConfigs} from './modules/shared/config';
+import {ThrottlerGuard, ThrottlerModule} from '@nestjs/throttler';
+import {APP_GUARD} from '@nestjs/core';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60_000,
+        limit: 10,
+      },
+    ]),
     AuthModule,
     UsersModule,
     RedisModule.forRootAsync({
@@ -46,6 +54,11 @@ import {AppConfigs} from './modules/shared/config';
     ScheduleModule.forRoot(),
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
