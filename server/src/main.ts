@@ -6,12 +6,14 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import cookie from '@fastify/cookie';
 import {randomBytes} from 'crypto';
+import {ConfigService} from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+  const configService = app.get(ConfigService);
   app.enableCors({
     credentials: true,
-    origin: 'http://localhost:5173',
+    origin: configService.getOrThrow<string>('app.origin'),
     allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-csrf-token',
     optionsSuccessStatus: 200,
     methods: '*',
@@ -29,8 +31,7 @@ async function bootstrap() {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-expect-error
   await app.register(fastifyCsrfProtection);
-  //TODO port
-  await app.listen(3000);
+  await app.listen(configService.getOrThrow<number>('app.port'));
 }
 
 bootstrap().then();
