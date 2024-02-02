@@ -1,12 +1,7 @@
-import {RoleEnum} from '../../../../db/entities/user.entity';
+import {TokenData} from '../../shared/types/jwt.types';
 
 export class TokensResponseDto {
   token: string;
   refreshToken?: string;
-  user: {
-    id: number;
-    role: keyof typeof RoleEnum;
-    nickname: string;
-    isMuted: boolean;
-  };
+  user: TokenData;
 }
