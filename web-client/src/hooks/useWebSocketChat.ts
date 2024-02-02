@@ -21,6 +21,13 @@ export default function useWebSocketChat() {
   const [online, setOnline] = useAtom(onlineAtom);
   const [messages, setMessages] = useAtom(messagesAtom);
 
+  useEffect(() => {
+    socketService.createConnection();
+    return () => {
+      socketService.closeConnection();
+    };
+  }, []);
+
   function updateUser(data: UpdateUserEvent) {
     const newUsers = structuredClone(users);
     const targetUser = newUsers.find(user => user.id === data.userId);
@@ -156,5 +163,6 @@ export default function useWebSocketChat() {
     socketService.socket?.emit('getMessages', {}, (data: MappedChatMessage[]) => {
       setMessages(data);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
