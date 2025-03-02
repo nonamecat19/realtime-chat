@@ -1,0 +1,58 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000:3000"
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  web-client:
+    build:
+      context: ./web-client
+      dockerfile: Dockerfile
+    env_file:
+      - ./web-client/.env
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql
+    env_file:
+      - .env
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306:3306'
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+volumes:
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge
